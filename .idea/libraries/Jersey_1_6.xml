@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Jersey 1.6">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/asm/asm/jars/asm-3.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.sun.jersey/jersey-server/bundles/jersey-server-1.6.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.sun.jersey/jersey-client/bundles/jersey-client-1.6.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.sun.jersey/jersey-core/bundles/jersey-core-1.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

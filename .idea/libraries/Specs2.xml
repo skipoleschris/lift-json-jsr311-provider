@@ -1,0 +1,22 @@
+<component name="libraryTable">
+  <library name="Specs2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.specs2/specs2_2.9.0-1/jars/specs2_2.9.0-1-1.5.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.specs2/specs2-scalaz-core_2.9.0-1/jars/specs2-scalaz-core_2.9.0-1-6.0.RC2.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/jars/junit-4.7.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.parboiled/parboiled-java/jars/parboiled-java-1.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.hamcrest/hamcrest-all/jars/hamcrest-all-1.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.pegdown/pegdown/jars/pegdown-1.0.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-tools.testing/scalacheck_2.9.0-1/jars/scalacheck_2.9.0-1-1.9.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.parboiled/parboiled-core/jars/parboiled-core-1.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-all/jars/mockito-all-1.8.5.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-tools.testing/test-interface/jars/test-interface-0.5.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/asm/asm-tree/jars/asm-tree-3.3.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/asm/asm-analysis/jars/asm-analysis-3.3.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/asm/asm/jars/asm-3.3.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/asm/asm-util/jars/asm-util-3.3.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
