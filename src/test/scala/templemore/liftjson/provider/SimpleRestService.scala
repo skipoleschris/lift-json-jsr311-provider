@@ -1,11 +1,11 @@
 package templemore.liftjson.provider
 
-import javax.ws.rs.{Consumes, PUT, Path}
 import javax.ws.rs.core.MediaType
-import java.util.Date
+import javax.ws.rs._
+import java.util.{TimeZone, Date}
 
 @Path("simple")
-class SimpleRestService {
+class SimpleRestService extends DateUtilities {
 
   var lastPerson: Person = _
 
@@ -14,6 +14,13 @@ class SimpleRestService {
   def simplePut(person: Person): Unit = {
     println("Person: " + person)
     lastPerson = person
+  }
+
+  @GET
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  def simpleGet: Person = {
+    val address = Address(Seq("4 Some Building", "Some Road"), "Some Town", "ST1 1ST", "UK")
+    Person("Chris", "Turner", makeDate(2, 7, 1973, TimeZone.getTimeZone("UTC")), address)
   }
 }
 

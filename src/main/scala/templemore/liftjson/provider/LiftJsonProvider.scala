@@ -4,10 +4,10 @@ import javax.ws.rs.{Consumes, Produces}
 import java.lang.reflect.Type
 import java.lang.annotation.Annotation
 import javax.ws.rs.core.{MultivaluedMap, MediaType}
-import java.io.{OutputStream, InputStream}
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
-import net.liftweb.json._
 import io.Source
+import net.liftweb.json._
+import java.io.{OutputStreamWriter, OutputStream, InputStream}
 
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
@@ -17,29 +17,14 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef] with MessageBodyWriter[
   def isWriteable(classType: Class[_],
                   genericType: Type,
                   annotations: Array[Annotation],
-                  mediaType: MediaType) = {
-    println("::isWritable")
-    println("classType=" + classType)
-    println("genericType=" + genericType)
-    println("annotations=" + annotations)
-    println("mediaType=" + mediaType)
-    false
-  }
+                  mediaType: MediaType) =
+    isJsonConversionForCaseClass(mediaType, classType)
 
   def getSize(value: AnyRef,
               classType: Class[_],
               genericType: Type,
               annotations: Array[Annotation],
-              mediaType: MediaType) = {
-    println("::getSize")
-    println("value=" + value)
-    println("classType=" + classType)
-    println("genericType=" + genericType)
-    println("annotations...")
-    annotations.foreach(a => println(a.getClass))
-    println("mediaType=" + mediaType)
-    0L
-  }
+              mediaType: MediaType) = -1L
 
   def writeTo(value: AnyRef,
               classType: Class[_],
@@ -48,21 +33,32 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef] with MessageBodyWriter[
               mediaType: MediaType,
               httpHeaders: MultivaluedMap[String, AnyRef],
               entityStream: OutputStream): Unit = {
-    println("::writeTo")
-    println("value=" + value)
-    println("classType=" + classType)
-    println("genericType=" + genericType)
-    println("annotations...")
-    annotations.foreach(a => println(a.getClass))
-    println("mediaType=" + mediaType)
-    println("httpHeaders=" + httpHeaders)
-    val json = Serialization.write(value)(DefaultFormats)
+    val jsonAst = Extraction.decompose(value)(DefaultFormats)
+    Printer.compact(render(jsonAst), new OutputStreamWriter(entityStream))
   }
 
   def isReadable(classType: Class[_],
                  genericType: Type,
                  annotations: Array[Annotation],
                  mediaType: MediaType) = {
+    isJsonConversionForCaseClass(mediaType, classType)
+  }
+
+  def readFrom(classType: Class[AnyRef],
+               genericType: Type,
+               annotations: Array[Annotation],
+               mediaType: MediaType,
+               httpHeaders: MultivaluedMap[String, String],
+               entityStream: InputStream) = {
+    def parseAndExtract(json: String, classType: Class[_]): AnyRef =
+      parse(json).extract(DefaultFormats, Manifest.classType(classType))
+
+    val buf = new scala.collection.mutable.StringBuilder()
+    Source.createBufferedSource(entityStream).getLines().foreach(buf.append)
+    classType.cast(parseAndExtract(buf.toString(), classType))
+  }
+
+  private def isJsonConversionForCaseClass(mediaType: MediaType, classType: Class[_]): Boolean = {
     isJsonType(Option(mediaType)) &&
     classType.getInterfaces.contains(classOf[Product])
   }
@@ -72,23 +68,6 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef] with MessageBodyWriter[
       val subtype = m.getSubtype
       "json".equalsIgnoreCase (subtype) || subtype.endsWith ("+json")
     }
-
     mediaType.map(checkSubType).getOrElse(false)
-  }
-
-  def readFrom(classType: Class[AnyRef],
-               genericType: Type,
-               annotations: Array[Annotation],
-               mediaType: MediaType,
-               httpHeaders: MultivaluedMap[String, String],
-               entityStream: InputStream) = {
-    val buf = new scala.collection.mutable.StringBuilder()
-    Source.createBufferedSource(entityStream).getLines().foreach(buf.append)
-    classType.cast(parseAndExtract(buf.toString(), classType))
-  }
-
-  private def parseAndExtract(json: String, classType: Class[_]): AnyRef = {
-    val jsonAst = parse(json)
-    jsonAst.extract(DefaultFormats, Manifest.classType(classType))
   }
 }
