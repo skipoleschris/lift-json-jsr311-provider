@@ -56,6 +56,7 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef] with MessageBodyWriter[
     annotations.foreach(a => println(a.getClass))
     println("mediaType=" + mediaType)
     println("httpHeaders=" + httpHeaders)
+    val json = Serialization.write(value)(DefaultFormats)
   }
 
   def isReadable(classType: Class[_],

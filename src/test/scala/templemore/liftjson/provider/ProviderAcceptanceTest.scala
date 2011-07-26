@@ -4,6 +4,7 @@ import org.specs2.Specification
 import com.sun.jersey.api.client.ClientResponse
 import java.text.SimpleDateFormat
 import java.util.{TimeZone, Date, Calendar}
+import net.liftweb.json.{DefaultFormats, Serialization}
 
 class ProviderAcceptanceTest extends Specification with RestServiceFixture { def is =
 
