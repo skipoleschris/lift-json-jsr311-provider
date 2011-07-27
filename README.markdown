@@ -13,7 +13,7 @@ In maven:
     <dependency>
         <groupId>templemore</groupId>
         <artifactId>lift-json-jsr311-provider_2.9.0-1</artifactId>
-        <version>0.1</version>
+        <version>0.2</version>
     </dependency>
 
     <repository>
@@ -31,7 +31,7 @@ In SBT:
 
     resolvers += "Templemore Repository" at "http://templemore.co.uk/repo"
 
-    libraryDependencies += "templemore" %% "lift-json-jsr311-provider" % "0.1"
+    libraryDependencies += "templemore" %% "lift-json-jsr311-provider" % "0.2"
 
 == Configuration ==
 
