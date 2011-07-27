@@ -48,6 +48,14 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef]
                annotations: Array[Annotation],
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
-               entityStream: InputStream) =
-    convertFromJson(classType, entityStream)
+               entityStream: InputStream) =  {
+    convertFromJson(classType, entityStream, transformerClass(annotations))
+  }
+
+  // Yuk, converting between Java and Scala can sometimes be messy!
+  private def transformerClass(annotations: Array[Annotation]) =
+    annotations.find(_.isInstanceOf[Transformer])
+               .asInstanceOf[Option[Transformer]]
+               .map(_.value)
+               .asInstanceOf[Option[Class[JsonASTTransformer]]]
 }
