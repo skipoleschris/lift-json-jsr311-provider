@@ -1,8 +1,9 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.fixture
 
 import javax.ws.rs.core.MediaType
 import javax.ws.rs._
 import java.util.{TimeZone, Date}
+import templemore.liftjson.provider.util.DateUtilities
 
 @Path("simple")
 class SimpleRestService extends DateUtilities {

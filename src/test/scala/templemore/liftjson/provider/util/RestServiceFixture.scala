@@ -1,8 +1,9 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.util
 
 import com.sun.jersey.api.core.DefaultResourceConfig
 import com.sun.jersey.simple.container.SimpleServerFactory
 import com.sun.jersey.api.client.{Client, ClientResponse, WebResource}
+import templemore.liftjson.provider.LiftJsonProvider
 
 trait RestServiceFixture {
 

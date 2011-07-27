@@ -18,3 +18,4 @@ libraryDependencies ++= Seq(
   "com.sun.jersey.contribs" % "jersey-simple-server" % "1.6" % "test"
 )
 
+publishTo := Some(Resolver.file("Local Repo", file((Path.userHome / ".m2" / "repository").toString)))

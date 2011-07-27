@@ -1,4 +1,4 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.util
 
 import java.util.{Date, Calendar, TimeZone}
 import java.text.SimpleDateFormat
