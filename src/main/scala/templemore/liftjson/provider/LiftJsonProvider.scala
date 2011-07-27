@@ -33,8 +33,8 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef] with MessageBodyWriter[
               mediaType: MediaType,
               httpHeaders: MultivaluedMap[String, AnyRef],
               entityStream: OutputStream): Unit = {
-    val jsonAst = Extraction.decompose(value)(DefaultFormats)
-    Printer.compact(render(jsonAst), new OutputStreamWriter(entityStream))
+    val jsonAST = Extraction.decompose(value)(DefaultFormats)
+    Printer.compact(render(jsonAST), new OutputStreamWriter(entityStream))
   }
 
   def isReadable(classType: Class[_],
@@ -50,12 +50,22 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef] with MessageBodyWriter[
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
                entityStream: InputStream) = {
-    def parseAndExtract(json: String, classType: Class[_]): AnyRef =
-      parse(json).extract(DefaultFormats, Manifest.classType(classType))
+    def extract(jsonAST: JValue, classType: Class[_]): AnyRef =
+      jsonAST.extract(DefaultFormats, Manifest.classType(classType))
 
     val buf = new scala.collection.mutable.StringBuilder()
     Source.createBufferedSource(entityStream).getLines().foreach(buf.append)
-    classType.cast(parseAndExtract(buf.toString(), classType))
+
+    val jsonAST = parse(buf.toString)
+
+    val transformer = annotations.find(_.isInstanceOf[Transformer]).asInstanceOf[Option[Transformer]].map(createTransformer)
+    val transformedJsonAST = transformer.map(_.transform(jsonAST)).getOrElse(jsonAST)
+
+    classType.cast(extract(transformedJsonAST, classType))
+  }
+
+  def createTransformer(annotation: Transformer) = {
+    annotation.value().newInstance().asInstanceOf[JsonASTTransformer]
   }
 
   private def isJsonConversionForCaseClass(mediaType: MediaType, classType: Class[_]): Boolean = {
