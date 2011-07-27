@@ -1,12 +1,12 @@
-= Lift-Json JSR-311 Provider =
+# Lift-Json JSR-311 Provider #
 
 This library implements a Provider adapter for JSR-311 (JAX-RS) to allow the lift-json library to be used for mapping between JSON documents and Scala case classes within a JAX-RS compliant server (e.g. Jersey). It supports automated mapping of incoming JSON messages to Scala case classes and returned case class instances back to JSON.
 
-== Obtaining ==
+## Obtaining ##
 
 The project is available from the Templemore maven repository at http://templemore.co.uk/repo.
 
-=== Maven dependency ===
+### Maven dependency ###
 
 In maven:
 
@@ -33,7 +33,7 @@ In SBT:
 
     libraryDependencies += "templemore" %% "lift-json-jsr311-provider" % "0.2"
 
-== Configuration ==
+## Configuration ##
 
 Configuration for the provider is simple. All you need to do is register the Provider with the JSR-311 implementation. For Jersey, this can be done as follows:
 
