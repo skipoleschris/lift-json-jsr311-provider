@@ -1,12 +1,9 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.fixture
 
 import javax.ws.rs.core.MediaType
 import javax.ws.rs._
 import java.util.{TimeZone, Date}
-import net.liftweb.json.JsonAST.{JField, JValue}
-import com.sun.tools.hat.internal.model.JavaValue
-import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
-import ch.epfl.lamp.fjbg.JField
+import templemore.liftjson.provider.util.DateUtilities
 
 @Path("ws")
 class SimpleRestService extends DateUtilities {
@@ -17,7 +14,6 @@ class SimpleRestService extends DateUtilities {
   @Path("simple")
   @Consumes(Array(MediaType.APPLICATION_JSON))
   def simplePut(person: Person): Unit = {
-    println("Person: " + person)
     lastPerson = person
   }
 
@@ -32,24 +28,10 @@ class SimpleRestService extends DateUtilities {
   @PUT
   @Path("transforming")
   @Consumes(Array(MediaType.APPLICATION_JSON))
-  def transformingPut(@Transformer(classOf[PersonInTransformer]) person: Person): Unit = {
-    println("Person: " + person)
+  def transformingPut(person: Person): Unit = {
     lastPerson = person
   }
 }
 
 case class Person(firstName: String, surname: String, dob: Date, address: Address)
 case class Address(lines: Seq[String], town: String, postcode: String, country: String)
-
-class PersonInTransformer extends JsonASTTransformer {
-
-  def transform(json: JValue) = {
-    def isFullName(v: JValue) = v match {
-      case JField("fullName", x) => true
-      case _ => false
-    }
-
-    val fullName = json.find(isFullName)
-    json.remove(isFullName).
-  }
-}

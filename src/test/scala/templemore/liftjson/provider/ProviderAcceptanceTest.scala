@@ -1,12 +1,16 @@
 package templemore.liftjson.provider
 
+import fixture.{Person, Address, SimpleRestService}
 import org.specs2.Specification
 import com.sun.jersey.api.client.ClientResponse
-import java.text.SimpleDateFormat
-import java.util.{TimeZone, Date, Calendar}
+import java.util.TimeZone
 import java.lang.IllegalStateException
+import util.{JsonUtilities, DateUtilities, RestServiceFixture}
 
-class ProviderAcceptanceTest extends Specification with RestServiceFixture with DateUtilities { def is =
+class ProviderAcceptanceTest extends Specification
+                             with RestServiceFixture
+                             with DateUtilities
+                             with JsonUtilities { def is =
 
   sequential^
   "Acceptance test for the Lift-Json JSR 311 provider"               ^
@@ -48,15 +52,6 @@ class ProviderAcceptanceTest extends Specification with RestServiceFixture with 
     val expectedPerson = Person("Chris", "Turner", makeDate(2, 7, 1973, TimeZone.getTimeZone("UTC")), expectedAddress)
     resource.lastPerson must_== expectedPerson
   }
-
-  protected def compact(s: String) =
-    s.replaceAll("""\s:\s""", ":")
-     .replaceAll("""\n""", "")
-     .replaceAll("""\{[\s]+""", "{")
-     .replaceAll(""",[\s]+""", ",")
-     .replaceAll("""[\s]+\[[\s]+""", "[")
-     .replaceAll("""[\s]+\]""", "]")
-     .replaceAll("""[\s]+\}""", "}")
 
   protected lazy val simpleJsonDocument = """{
         "firstName" : "Chris",

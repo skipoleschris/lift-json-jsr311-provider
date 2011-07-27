@@ -1,6 +1,6 @@
 name := "lift-json-jsr311-provider"
 
-version := "0.1"
+version := "0.2"
 
 organization := "templemore"
 
@@ -18,3 +18,4 @@ libraryDependencies ++= Seq(
   "com.sun.jersey.contribs" % "jersey-simple-server" % "1.6" % "test"
 )
 
+publishTo := Some(Resolver.file("Local Repo", file((Path.userHome / ".m2" / "repository").toString)))
