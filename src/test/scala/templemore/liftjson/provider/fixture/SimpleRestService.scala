@@ -13,7 +13,6 @@ class SimpleRestService extends DateUtilities {
   @PUT
   @Consumes(Array(MediaType.APPLICATION_JSON))
   def simplePut(person: Person): Unit = {
-    println("Person: " + person)
     lastPerson = person
   }
 
