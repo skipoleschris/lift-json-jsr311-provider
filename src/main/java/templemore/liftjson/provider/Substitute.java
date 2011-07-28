@@ -6,7 +6,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @java.lang.annotation.Target({METHOD, FIELD})
 @java.lang.annotation.Retention(RUNTIME)
-public @interface Converter {
+public @interface Substitute {
 
     Class<?> value();
 }

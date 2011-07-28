@@ -4,9 +4,10 @@ import javax.ws.rs.core.MediaType
 import javax.ws.rs._
 import java.util.{TimeZone, Date}
 import templemore.liftjson.provider.util.DateUtilities
+import templemore.liftjson.provider.Transformer
 
 @Path("ws")
-class SimpleRestService extends DateUtilities {
+class TestRestService extends DateUtilities {
 
   var lastPerson: Person = _
 
@@ -28,7 +29,7 @@ class SimpleRestService extends DateUtilities {
   @PUT
   @Path("transforming")
   @Consumes(Array(MediaType.APPLICATION_JSON))
-  def transformingPut(person: Person): Unit = {
+  def transformingPut(@Transformer(classOf[PersonInputTransformer]) person: Person): Unit = {
     lastPerson = person
   }
 }

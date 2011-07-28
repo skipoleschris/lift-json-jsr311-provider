@@ -1,6 +1,6 @@
 package templemore.liftjson.provider
 
-import fixture.{Person, Address, SimpleRestService}
+import fixture.{Person, Address, TestRestService}
 import org.specs2.Specification
 import com.sun.jersey.api.client.ClientResponse
 import java.util.TimeZone
@@ -22,7 +22,7 @@ class ProviderAcceptanceTest extends Specification
                                                                      end
 
   def simpleInRestCall = {
-    val resource = new SimpleRestService()
+    val resource = new TestRestService()
     invokeService[String](resource, "/ws/simple", 204) { res =>
       res.header("Content-Type", "application/json").put(classOf[ClientResponse], simpleJsonDocument)
     }
@@ -33,7 +33,7 @@ class ProviderAcceptanceTest extends Specification
   }
 
   def simpleOutRestCall = {
-    val resource = new SimpleRestService()
+    val resource = new TestRestService()
     val response = invokeService[String](resource, "/ws/simple", 200) { res =>
       res.get(classOf[ClientResponse])
     }
@@ -43,7 +43,7 @@ class ProviderAcceptanceTest extends Specification
   }
 
   def transformingInRestCall = {
-    val resource = new SimpleRestService()
+    val resource = new TestRestService()
     invokeService[String](resource, "/ws/transforming", 204) { res =>
       res.header("Content-Type", "application/json").put(classOf[ClientResponse], transformJsonDocument)
     }
