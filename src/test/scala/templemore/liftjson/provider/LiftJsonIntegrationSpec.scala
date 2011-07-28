@@ -15,6 +15,8 @@ class LiftJsonIntegrationSpec extends Specification
     "Convert json into a case class instance"                        ! readCaseClassFromJson^
     "Convert a case class instance into json"                        ! writeJsonFromCaseClass^
     "Convert transformed json into a case class"                     ! readCaseClassFromTransformedJson^
+    "Convert json into optional case class fields"                   ! readCaseClassWithOptionalsFromJson^
+    "Convert a optional case class fields into json"                 ! writeJsonFromCaseClassWithOptionals^
                                                                      end
 
   //TODO: Tests covering converting json into a case class with a transformer present
@@ -59,4 +61,26 @@ class LiftJsonIntegrationSpec extends Specification
                     entityStream,
                     Some(classOf[AddressInputTransformer])) must_== Address(List("Line 1", "Line 2"), "Town", "POSTCODE", "UK")
   }
+
+  def readCaseClassWithOptionalsFromJson = {
+    val json = """{
+          "foo" : "Line 1"
+        }"""
+
+    val entityStream = new ByteArrayInputStream(json.getBytes)
+    convertFromJson(classOf[FooBar].asInstanceOf[Class[AnyRef]],
+                    entityStream,
+                    None) must_== FooBar(Some("Line 1"), None)
+  }
+
+  def writeJsonFromCaseClassWithOptionals = {
+    val entityStream = new ByteArrayOutputStream()
+    convertToJson(FooBar(Some("Line 1"), None),
+                  entityStream)
+      entityStream.toString must_== compact("""{
+          "foo" : "Line 1"
+        }""")
+  }
 }
+
+case class FooBar(foo: Option[String], bar: Option[String])
