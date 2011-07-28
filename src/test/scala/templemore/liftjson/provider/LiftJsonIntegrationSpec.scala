@@ -1,6 +1,6 @@
 package templemore.liftjson.provider
 
-import fixture.Address
+import fixture.{AddressInputTransformer, Address}
 import org.specs2.Specification
 import util.JsonUtilities
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
@@ -14,6 +14,7 @@ class LiftJsonIntegrationSpec extends Specification
   "The lift json integration should"                                 ^
     "Convert json into a case class instance"                        ! readCaseClassFromJson^
     "Convert a case class instance into json"                        ! writeJsonFromCaseClass^
+    "Convert transformed json into a case class"                     ! readCaseClassFromTransformedJson^
                                                                      end
 
   //TODO: Tests covering converting json into a case class with a transformer present
@@ -42,5 +43,20 @@ class LiftJsonIntegrationSpec extends Specification
           "postcode" : "POSTCODE",
           "country" : "UK"
         }""")
+  }
+
+  def readCaseClassFromTransformedJson = {
+    val json = """{
+          "line1" : "Line 1",
+          "line2" : "Line 2",
+          "town" : "Town",
+          "postcode" : "POSTCODE",
+          "country" : "UK"
+        }"""
+
+    val entityStream = new ByteArrayInputStream(json.getBytes)
+    convertFromJson(classOf[Address].asInstanceOf[Class[AnyRef]],
+                    entityStream,
+                    Some(classOf[AddressInputTransformer])) must_== Address(List("Line 1", "Line 2"), "Town", "POSTCODE", "UK")
   }
 }

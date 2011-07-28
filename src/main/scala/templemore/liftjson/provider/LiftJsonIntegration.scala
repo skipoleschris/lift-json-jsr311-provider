@@ -13,7 +13,7 @@ private[provider] trait LiftJsonIntegration {
 
   protected def convertFromJson(classType: Class[AnyRef],
                                 entityStream: InputStream,
-                                transformerClass: Option[Class[JsonASTTransformer]]) = {
+                                transformerClass: Option[Class[_ <: JsonASTTransformer]]) = {
     def extract(jsonAST: JValue, classType: Class[_]): AnyRef =
       jsonAST.extract(DefaultFormats, Manifest.classType(classType))
 
@@ -26,7 +26,7 @@ private[provider] trait LiftJsonIntegration {
     classType.cast(extract(jsonAST, classType))
   }
 
-  private def transformIfPossible(transformerClass: Option[Class[JsonASTTransformer]])
+  private def transformIfPossible(transformerClass: Option[Class[_ <: JsonASTTransformer]])
                                  (jsonAST: JValue): JValue = {
     val transformer = transformerClass.map(_.newInstance)
     transformer.map(_.transform(jsonAST)).getOrElse(jsonAST)

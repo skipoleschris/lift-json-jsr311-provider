@@ -178,7 +178,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
 
     var capturedValue: AnyRef = _
     var capturedClassType: Class[AnyRef] = _
-    var capturedTransformerClass: Option[Class[JsonASTTransformer]] = _
+    var capturedTransformerClass: Option[Class[_ <: JsonASTTransformer]] = _
     var capturedJson: String = _
 
     override protected def convertToJson(value: AnyRef, entityStream: OutputStream): Unit = {
@@ -188,7 +188,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
 
     override protected def convertFromJson(classType: Class[AnyRef],
                                            entityStream: InputStream,
-                                           transformerClass: Option[Class[JsonASTTransformer]]): AnyRef = {
+                                           transformerClass: Option[Class[_ <: JsonASTTransformer]]): AnyRef = {
       capturedClassType = classType
       capturedTransformerClass = transformerClass
 
