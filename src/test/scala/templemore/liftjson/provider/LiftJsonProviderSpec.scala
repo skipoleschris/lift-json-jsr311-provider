@@ -1,6 +1,6 @@
 package templemore.liftjson.provider
 
-import fixture.{Address, Person}
+import fixture.{PersonInputTransformer, Address, Person}
 import org.specs2.Specification
 import javax.ws.rs.core.MediaType
 import util.{DateUtilities, JsonUtilities}
@@ -26,10 +26,9 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     "Indicate it CAN NOT read for json into a non-case class"        ! canNotReadJsonNormalClass^
     "Convert json from the supplied entity stream"                   ! readFromEntityStream^
     "Convert into the expected case class"                           ! convertToCaseClass^
-    "Not utilise any transformer when no annotation"                 ! notUtiliseTransformer^
+    "Not utilise any transformer when no annotation"                 ! notUtiliseReadTransformer^
+    "Recognise a transformer annotation"                             ! utiliseReadTransformer^
                                                                      end
-
-  //TODO: Tests checking that transformer annotations are correctly passed to reader methods
 
   def canWriteJsonCaseClass = {
     val provider = new TestableLiftJsonProvider()
@@ -136,41 +135,41 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
   }
 
   def convertToCaseClass = {
-    val json = """{
-          "lines": [ "Line 1" ],
-          "town" : "Town",
-          "postcode" : "POSTCODE",
-          "country" : "UK"
-        }"""
-    val entityStream = new ByteArrayInputStream(json.getBytes)
+    val entityStream = new ByteArrayInputStream("".getBytes)
     val transformer = readFrom(entityStream)
     transformer.capturedClassType must_==  classOf[Address]
   }
 
-  def notUtiliseTransformer = {
-    val json = """{
-          "lines": [ "Line 1" ],
-          "town" : "Town",
-          "postcode" : "POSTCODE",
-          "country" : "UK"
-        }"""
-    val entityStream = new ByteArrayInputStream(json.getBytes)
+  def notUtiliseReadTransformer = {
+    val entityStream = new ByteArrayInputStream("".getBytes)
     val transformer = readFrom(entityStream)
     transformer.capturedTransformerClass must_== None
   }
 
-  private def readFrom(entityStream: InputStream) = {
+  def utiliseReadTransformer = {
+    val entityStream = new ByteArrayInputStream("".getBytes)
+    val transformer = readFrom(entityStream, Some(transformerAnnotation))
+    transformer.capturedTransformerClass must_== Some(classOf[PersonInputTransformer])
+  }
+
+  private def readFrom(entityStream: InputStream, annotation: Option[java.lang.annotation.Annotation] = None) = {
     val provider = new TestableLiftJsonProvider()
+    val annotations = annotation.map(Array(_)).getOrElse(Array[java.lang.annotation.Annotation]())
     provider.readFrom(classOf[Address].asInstanceOf[Class[AnyRef]],
                       classOf[Address].getGenericSuperclass,
-                      Array[java.lang.annotation.Annotation](),
+                      annotations,
                       MediaType.APPLICATION_JSON_TYPE,
                       null,
                       entityStream) must_== Address(List("Line 1"), "Town", "POSTCODE", "UK")
     provider
   }
 
-  class NonCaseClass(val content: String)
+  private def transformerAnnotation =
+    classOf[NonCaseClass].getMethod("transformerPlaceholder").getAnnotation(classOf[Transformer])
+
+  class NonCaseClass(val content: String) {
+    @Transformer(classOf[PersonInputTransformer]) def transformerPlaceholder(): Unit = {}
+  }
 
   // Testable version of the provider that overrides the conversion methods to capture
   // the parameter values rather than doing the actual conversions
