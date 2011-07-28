@@ -6,7 +6,7 @@ import java.io.{InputStream, OutputStream, OutputStreamWriter}
 
 private[provider] trait LiftJsonIntegration {
 
-  protected def convertToJson(value: AnyRef, entityStream: OutputStream) = {
+  protected def convertToJson(value: AnyRef, entityStream: OutputStream): Unit = {
     val jsonAst = Extraction.decompose(value)(DefaultFormats)
     Printer.compact(render(jsonAst), new OutputStreamWriter(entityStream))
   }
