@@ -10,10 +10,12 @@ import java.io.{OutputStream, InputStream}
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
 @Produces(Array(MediaType.APPLICATION_JSON, "text/json"))
-class LiftJsonProvider extends MessageBodyReader[AnyRef]
-                       with MessageBodyWriter[AnyRef]
-                       with LiftJsonIntegration
-                       with SupportedTypes {
+class LiftJsonProvider(val transformerFactory: TransformerFactory) extends MessageBodyReader[AnyRef]
+                                                                   with MessageBodyWriter[AnyRef]
+                                                                   with LiftJsonIntegration
+                                                                   with SupportedTypes {
+
+  def this() = this(new NewInstanceTransformerFactory())
 
   def isWriteable(classType: Class[_],
                   genericType: Type,

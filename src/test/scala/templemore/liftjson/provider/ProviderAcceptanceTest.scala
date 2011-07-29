@@ -20,6 +20,7 @@ class ProviderAcceptanceTest extends Specification
     "support automated conversion from a domain object into JSON"    ! simpleOutRestCall^
     "support transformation of incoming JSON"                        ! transformingInRestCall^
     "support transformation of outgoing JSON"                        ! transformingOutRestCall^
+    "allow use of an alternative transformer factory"                ! alternativeTransformerFactory^
                                                                      end
 
   def simpleInRestCall = {
@@ -62,6 +63,23 @@ class ProviderAcceptanceTest extends Specification
 
     val json = response.getOrElse(throw new IllegalStateException())
     json must_== compact(transformJsonDocument)
+  }
+
+  def alternativeTransformerFactory = {
+    val factory = new TestTransformerFactory()
+    val resource = new TestRestService()
+    val response = invokeService[String](resource, "/ws/transforming", 200, new LiftJsonProvider(factory)) { res =>
+      res.get(classOf[ClientResponse])
+    }
+
+    factory.invoked must_==  true
+  }
+
+  class TestTransformerFactory(var invoked: Boolean = false) extends NewInstanceTransformerFactory {
+    override def transformer[T <: JsonASTTransformer](transformerClass: Class[T]) = {
+      invoked = true
+      super.transformer(transformerClass)
+    }
   }
 
   protected lazy val simpleJsonDocument = """{
