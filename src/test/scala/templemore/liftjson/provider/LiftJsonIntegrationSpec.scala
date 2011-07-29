@@ -20,7 +20,7 @@ class LiftJsonIntegrationSpec extends Specification
     "Convert a optional case class fields into json"                 ! writeJsonFromCaseClassWithOptionals^
                                                                      end
 
-  protected def transformerFactory = new NewInstanceTransformerFactory
+  protected def config = ProviderConfig()
 
   def readCaseClassFromJson = {
     val json = """{
