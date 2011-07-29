@@ -6,7 +6,7 @@ import java.io.{InputStream, OutputStream, OutputStreamWriter}
 
 private[provider] trait LiftJsonIntegration {
 
-  protected def transformerFactory: TransformerFactory
+  protected def config: ProviderConfig
 
   protected def convertToJson(value: AnyRef,
                               entityStream: OutputStream,
@@ -34,7 +34,7 @@ private[provider] trait LiftJsonIntegration {
 
   private def transformIfPossible(transformerClass: Option[Class[_ <: JsonASTTransformer]])
                                  (jsonAST: JValue): JValue = {
-    val transformer = transformerClass.map(transformerFactory.transformer(_))
+    val transformer = transformerClass.map(config.transformerFactory.transformer(_))
     transformer.map(_.transform(jsonAST)).getOrElse(jsonAST)
   }
 }

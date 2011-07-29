@@ -67,8 +67,9 @@ class ProviderAcceptanceTest extends Specification
 
   def alternativeTransformerFactory = {
     val factory = new TestTransformerFactory()
+    val config = ProviderConfig(factory)
     val resource = new TestRestService()
-    val response = invokeService[String](resource, "/ws/transforming", 200, new LiftJsonProvider(factory)) { res =>
+    invokeService[String](resource, "/ws/transforming", 200, new LiftJsonProvider(config)) { res =>
       res.get(classOf[ClientResponse])
     }
 

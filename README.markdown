@@ -44,11 +44,14 @@ Using a manual configuration:
     val resourceConfig = new DefaultResourceConfig(classOf[LiftJsonProvider])
     // Create the server passing the resource config
 
-Or, if using Spring and Jersey, in the spring context config:
-
-    <bean class="templemore.liftjson.provider.LiftJsonProvider" scope="singleton"/>
-
 Once registered, the provider will handle all JSON mappings where the object to map to is a Scala case class. Any non-Scala case class objects will be left unhandled so that they can be processed by an alternative JSON provider implementation (if installed).
+
+If you want finer grained control you can create a custom ProviderConfig instance, overriding any of the default values and pass this to the provider instead:
+
+    val resourceConfig = new DefaultResourceConfig()
+    val config = ProviderConfig(...)  // Set the config options you want to override
+    resourceConfig.getSingletons.add(new LiftJsonProvider(config))
+    val serverHandle = SimpleServerFactory.create(LocalServer, resourceConfig)
 
 ## Transformers ##
 
@@ -96,17 +99,12 @@ To implement a transformer just create a class that extends the JsonASTTransform
 
 ### Transformer Factory ###
 
-By default, instances of transformers are created from the class each time they are needed. For some applications this may not be appropriate. For example, you may need some injected dependencies in the transformer in order to lookup data values. It is therefore possible to create your own TransformerFactory instance and pass this to the provider when it is constructed.
+By default, instances of transformers are created from the class each time they are needed. For some applications this may not be appropriate. For example, you may need some injected dependencies in the transformer in order to lookup data values. It is therefore possible to create your own TransformerFactory instance and override the default in the provider config.
 
     class MyCustomTransformerFactory extends TransformerFactory {
       def transformer[T <: JsonASTTransformer](transformerClass: Class[T]) = ...
     }
 
-You also need to modify the setup of the Jersey server to allow this to be used:
-
-    val resourceConfig = new DefaultResourceConfig()
-    resourceConfig.getSingletons.add(resource)
-    resourceConfig.getSingletons.add(new LiftJsonProvider(myCustomFactoryInstance))
-    val serverHandle = SimpleServerFactory.create(LocalServer, resourceConfig)
-
+    val config = ProviderConfig(transformerFactory = new MyCustomTransformerFactory())
+    // Create the provider with the custom config
 
