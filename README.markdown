@@ -94,3 +94,19 @@ To implement a transformer just create a class that extends the JsonASTTransform
       }
     }
 
+### Transformer Factory ###
+
+By default, instances of transformers are created from the class each time they are needed. For some applications this may not be appropriate. For example, you may need some injected dependencies in the transformer in order to lookup data values. It is therefore possible to create your own TransformerFactory instance and pass this to the provider when it is constructed.
+
+    class MyCustomTransformerFactory extends TransformerFactory {
+      def transformer[T <: JsonASTTransformer](transformerClass: Class[T]) = ...
+    }
+
+You also need to modify the setup of the Jersey server to allow this to be used:
+
+    val resourceConfig = new DefaultResourceConfig()
+    resourceConfig.getSingletons.add(resource)
+    resourceConfig.getSingletons.add(new LiftJsonProvider(myCustomFactoryInstance))
+    val serverHandle = SimpleServerFactory.create(LocalServer, resourceConfig)
+
+

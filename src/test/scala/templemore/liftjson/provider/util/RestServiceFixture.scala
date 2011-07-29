@@ -10,11 +10,13 @@ trait RestServiceFixture {
   protected def LocalServer = "http://localhost:32434"
   private val NoContent = 204
 
-  protected def invokeService[T](resource: AnyRef, path: String, expectedStatus: Int)
+  protected def invokeService[T](resource: AnyRef, path: String, expectedStatus: Int,
+                                 provider: LiftJsonProvider = new LiftJsonProvider())
                                 (withAction: (WebResource) => ClientResponse)
                                 (implicit manifest: Manifest[T]): Option[T] = {
-    val resourceConfig = new DefaultResourceConfig(classOf[LiftJsonProvider])
+    val resourceConfig = new DefaultResourceConfig()
     resourceConfig.getSingletons.add(resource)
+    resourceConfig.getSingletons.add(provider)
     val serverHandle = SimpleServerFactory.create(LocalServer, resourceConfig)
 
     try {
