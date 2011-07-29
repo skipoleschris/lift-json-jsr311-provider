@@ -18,7 +18,8 @@ class ProviderAcceptanceTest extends Specification
   "The JSR 311 provider should"                                      ^
     "support automated conversion from JSON into a domain object"    ! simpleInRestCall^
     "support automated conversion from a domain object into JSON"    ! simpleOutRestCall^
-    "support transformation of JSON on an in call"                   ! transformingInRestCall^
+    "support transformation of incoming JSON"                        ! transformingInRestCall^
+    "support transformation of outgoing JSON"                        ! transformingOutRestCall^
                                                                      end
 
   def simpleInRestCall = {
@@ -51,6 +52,16 @@ class ProviderAcceptanceTest extends Specification
     val expectedAddress = Address(Seq("4 Some Building", "Some Road"), "Some Town", "ST1 1ST", "UK")
     val expectedPerson = Person("Chris", "Turner", makeDate(2, 7, 1973, TimeZone.getTimeZone("UTC")), expectedAddress)
     resource.lastPerson must_== expectedPerson
+  }
+
+  def transformingOutRestCall = {
+    val resource = new TestRestService()
+    val response = invokeService[String](resource, "/ws/transforming", 200) { res =>
+      res.get(classOf[ClientResponse])
+    }
+
+    val json = response.getOrElse(throw new IllegalStateException())
+    json must_== compact(transformJsonDocument)
   }
 
   protected lazy val simpleJsonDocument = """{

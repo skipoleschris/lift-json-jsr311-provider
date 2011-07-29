@@ -19,6 +19,8 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     "Fail to provide a size"                                         ! noSizeProvided^
     "Convert the expected case class instance"                       ! convertFromCaseClass^
     "Write json to the supplied entity stream"                       ! writeToEntityStream^
+    "Not utilise and transformer when no annotation"                 ! notUtiliseWriteTransformer^
+    "Recognise a transformer annotation"                             ! utiliseWriteTransformer^
                                                                      endp^
   "A reader lift-json provider should"                               ^
     "Indicate it can read for json into a case class"                ! canReadJsonCaseClass^
@@ -80,7 +82,19 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
         }""")
   }
 
-  private def writeTo(entityStream: OutputStream) = {
+  def notUtiliseWriteTransformer = {
+    val entityStream = new ByteArrayOutputStream()
+    val transformer = writeTo(entityStream)
+    transformer.capturedTransformerClass must_== None
+  }
+
+  def utiliseWriteTransformer = {
+    val entityStream = new ByteArrayOutputStream()
+    val transformer = writeTo(entityStream, Some(transformerAnnotation))
+    transformer.capturedTransformerClass must_== Some(classOf[PersonInputTransformer])
+  }
+
+  private def writeTo(entityStream: OutputStream, annotation: Option[java.lang.annotation.Annotation] = None) = {
     val json = """{
           "lines": [ "Line 1" ],
           "town" : "Town",
@@ -88,10 +102,11 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
           "country" : "UK"
         }"""
     val provider = new TestableLiftJsonProvider(outputJson = json)
+    val annotations = annotation.map(Array(_)).getOrElse(Array[java.lang.annotation.Annotation]())
     provider.writeTo(Address(List("Line 1"), "Town", "POSTCODE", "UK"),
                      classOf[Address],
                      classOf[Address].getGenericSuperclass,
-                     Array[java.lang.annotation.Annotation](),
+                     annotations,
                      MediaType.APPLICATION_JSON_TYPE,
                      null,
                      entityStream)
@@ -160,7 +175,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
                       annotations,
                       MediaType.APPLICATION_JSON_TYPE,
                       null,
-                      entityStream) must_== Address(List("Line 1"), "Town", "POSTCODE", "UK")
+                      entityStream)
     provider
   }
 
@@ -181,8 +196,11 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     var capturedTransformerClass: Option[Class[_ <: JsonASTTransformer]] = _
     var capturedJson: String = _
 
-    override protected def convertToJson(value: AnyRef, entityStream: OutputStream): Unit = {
+    override protected def convertToJson(value: AnyRef,
+                                         entityStream: OutputStream,
+                                         transformerClass: Option[Class[_ <: JsonASTTransformer]]): Unit = {
       capturedValue = value
+      capturedTransformerClass = transformerClass
       entityStream.write(outputJson.getBytes)
     }
 
