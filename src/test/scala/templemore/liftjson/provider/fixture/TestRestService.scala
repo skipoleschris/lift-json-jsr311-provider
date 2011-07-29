@@ -32,6 +32,15 @@ class TestRestService extends DateUtilities {
   def transformingPut(@Transformer(classOf[PersonInputTransformer]) person: Person): Unit = {
     lastPerson = person
   }
+
+  @GET
+  @Path("transforming")
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  @Transformer(classOf[PersonOutputTransformer])
+  def transformingGet: Person = {
+    val address = Address(Seq("4 Some Building", "Some Road"), "Some Town", "ST1 1ST", "UK")
+    Person("Chris", "Turner", makeDate(2, 7, 1973, TimeZone.getTimeZone("UTC")), address)
+  }
 }
 
 case class Person(firstName: String, surname: String, dob: Date, address: Address)

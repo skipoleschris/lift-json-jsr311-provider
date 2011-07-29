@@ -2,7 +2,7 @@ package templemore.liftjson.provider.fixture
 
 import templemore.liftjson.provider.JsonASTTransformer
 import scala.None
-import net.liftweb.json.JsonAST.{JString, JArray, JField, JValue}
+import net.liftweb.json.JsonAST._
 
 class PersonInputTransformer extends JsonASTTransformer{
 
@@ -16,10 +16,10 @@ class PersonInputTransformer extends JsonASTTransformer{
     val updated = json.children.filter (_ match {
       case JField("fullName", x) => fullName = Some(x.values.toString); false
       case _ => true
-    })
+    }).asInstanceOf[List[JField]]
 
     val names = fullName.map(splitNames).getOrElse(throw new IllegalArgumentException("fullName not found"))
-    new JArray(JField("firstName", new JString(names._1)) ::
+    new JObject(JField("firstName", new JString(names._1)) ::
                JField("surname", new JString(names._2)) ::
                updated)
   }

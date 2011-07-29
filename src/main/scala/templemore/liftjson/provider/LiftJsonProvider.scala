@@ -34,7 +34,7 @@ class LiftJsonProvider extends MessageBodyReader[AnyRef]
               mediaType: MediaType,
               httpHeaders: MultivaluedMap[String, AnyRef],
               entityStream: OutputStream): Unit =
-    convertToJson(value, entityStream)
+    convertToJson(value, entityStream, transformerClass(annotations))
 
   def isReadable(classType: Class[_],
                  genericType: Type,
