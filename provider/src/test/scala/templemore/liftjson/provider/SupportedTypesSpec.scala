@@ -10,8 +10,12 @@ class SupportedTypesSpec extends Specification with SupportedTypes { def is =
   "Supported types should"                                           ^
     "support json media type for a scala case class"                 ! supported(MediaType.APPLICATION_JSON_TYPE,
                                                                                  classOf[CaseClass])^
+    "support json media type for a scala case class in an array"     ! supported(MediaType.APPLICATION_JSON_TYPE,
+                                                                                 classOf[Array[CaseClass]])^
     "not support json media type for a normal scala class"           ! notSupported(MediaType.APPLICATION_JSON_TYPE,
                                                                                     classOf[NormalClass])^
+    "not support json media type for a normal scala class in an array" ! notSupported(MediaType.APPLICATION_JSON_TYPE,
+                                                                                      classOf[Array[NormalClass]])^
     "not support text media type for a scala case class"             ! notSupported(MediaType.TEXT_PLAIN_TYPE,
                                                                                     classOf[CaseClass])^
                                                                      end

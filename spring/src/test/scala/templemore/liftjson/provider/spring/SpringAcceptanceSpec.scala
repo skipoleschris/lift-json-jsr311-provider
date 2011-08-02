@@ -1,13 +1,14 @@
 package templemore.liftjson.provider.spring
 
 import org.specs2.Specification
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.specs2.specification.Around
 import org.specs2.execute.Result
-import org.eclipse.jetty.webapp.WebAppContext
+import util.{JsonUtilities, RestServiceFixture, EmbeddedJetty}
+import com.sun.jersey.api.client.ClientResponse
 
-class SpringAcceptanceSpec extends Specification { def is =
+class SpringAcceptanceSpec extends Specification
+                           with RestServiceFixture
+                           with JsonUtilities { def is =
 
   sequential^
   "Acceptance specification for the spring support component"        ^
@@ -17,13 +18,23 @@ class SpringAcceptanceSpec extends Specification { def is =
                                                                      end
 
   def springSupport = {
-    pending
+    val response = invokeService[String]("/user", 200) { res =>
+      res.get(classOf[ClientResponse])
+    }
+
+    val json = response.getOrElse(throw new IllegalStateException())
+    json must_== compact(usersJsonDocument)
   }
 
+  private val usersJsonDocument = """[
+      { "username" : "root", "fullName" : "Administrator" },
+      { "username" : "chris", "fullName" : "Chris Turner" },
+      { "username" : "foo", "fullName" : "Foo Bar" }
+  ]"""
 
+  object JettyServer extends Around with EmbeddedJetty {
 
-  object JettyServer extends Around {
-    val server = new Server()
+    protected def webAppPath = "spring/src/test/webapp"
 
     def around[T](t: => T)(implicit evidence: ( T ) => Result) = {
       try {
@@ -31,22 +42,5 @@ class SpringAcceptanceSpec extends Specification { def is =
         t
       } finally stopJetty()
     }
-
-    private def startJetty(): Unit = {
-      val connector = new SelectChannelConnector()
-      connector.setPort(8081)
-      connector.setHost("127.0.0.1")
-      server.addConnector(connector)
-
-      val wac = new WebAppContext()
-      wac.setContextPath("/")
-      wac.setWar("spring/src/test/webapp")
-      server.setHandler(wac)
-      server.setStopAtShutdown(true)
-
-      server.start()
-    }
-
-    private def stopJetty(): Unit = server.stop()
   }
 }
