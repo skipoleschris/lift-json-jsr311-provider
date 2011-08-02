@@ -5,13 +5,11 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.webapp.WebAppContext
 
 
-trait EmbeddedJetty {
+class EmbeddedJetty(webAppPath: String, port: Int = 8081) {
 
-  private val server = new Server()
-  protected def port = 8081
-  protected def webAppPath: String
+  private val server: Server = new Server()
 
-  protected def startJetty(): Unit = {
+  def start(): Unit = {
     val connector = new SelectChannelConnector()
     connector.setPort(8081)
     connector.setHost("127.0.0.1")
@@ -26,5 +24,5 @@ trait EmbeddedJetty {
     server.start()
   }
 
-  protected def stopJetty(): Unit = server.stop()
+  def stop(): Unit = server.stop()
 }

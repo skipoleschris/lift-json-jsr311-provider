@@ -1,7 +1,8 @@
 package templemore.liftjson.provider.spring.fixture
 
 import javax.ws.rs.core.MediaType
-import javax.ws.rs.{GET, Produces, Path}
+import javax.ws.rs._
+import templemore.liftjson.provider.Transformer
 
 @Path("user")
 class UserRestService {
@@ -12,6 +13,12 @@ class UserRestService {
     Array(UserInfo("root", "Administrator"),
           UserInfo("chris", "Chris Turner"),
           UserInfo("foo", "Foo Bar"))
+  }
+
+  @PUT
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def addUser(@Transformer(classOf[UserInputTransformer]) user: UserInfo): Unit = {
+
   }
 }
 

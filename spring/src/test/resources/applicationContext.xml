@@ -3,7 +3,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean class="templemore.liftjson.provider.LiftJsonProvider" scope="singleton"/>
+    <bean class="templemore.liftjson.provider.LiftJsonProvider" scope="singleton">
+        <constructor-arg ref="providerConfig"/>
+    </bean>
+
+    <bean id="providerConfig" class="templemore.liftjson.provider.spring.ProviderConfigFactory">
+
+    </bean>
 
     <bean id="userRestService" class="templemore.liftjson.provider.spring.fixture.UserRestService"/>
 

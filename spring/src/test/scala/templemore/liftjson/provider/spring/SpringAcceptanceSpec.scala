@@ -1,20 +1,22 @@
 package templemore.liftjson.provider.spring
 
 import org.specs2.Specification
-import org.specs2.specification.Around
 import org.specs2.execute.Result
 import util.{JsonUtilities, RestServiceFixture, EmbeddedJetty}
 import com.sun.jersey.api.client.ClientResponse
+import org.specs2.specification.{Before, Around}
 
 class SpringAcceptanceSpec extends Specification
                            with RestServiceFixture
-                           with JsonUtilities { def is =
+                           with JsonUtilities
+                           with Before { def is =
 
   sequential^
   "Acceptance specification for the spring support component"        ^
                                                                      endp^
   "The spring support module should"                                 ^
     "allow the provider to be used in a spring application"          ! JettyServer(springSupport)^
+    "support injection of a transformer for input json"              ! JettyServer(transformIn)^
                                                                      end
 
   def springSupport = {
@@ -26,21 +28,33 @@ class SpringAcceptanceSpec extends Specification
     json must_== compact(usersJsonDocument)
   }
 
+  def transformIn = {
+    invokeService[String]("/user", 204) { res =>
+      res.header("Content-Type", "application/json").put(classOf[ClientResponse], UserJsonDocument)
+    } must_==  None
+  }
+
   private val usersJsonDocument = """[
       { "username" : "root", "fullName" : "Administrator" },
       { "username" : "chris", "fullName" : "Chris Turner" },
       { "username" : "foo", "fullName" : "Foo Bar" }
   ]"""
 
-  object JettyServer extends Around with EmbeddedJetty {
+  private val UserJsonDocument = """{
+    "user" : "Fred Bloggs <fred>"
+  }"""
 
-    protected def webAppPath = "spring/src/test/webapp"
+
+  def before = throw new IllegalStateException()
+
+  object JettyServer extends Around {
 
     def around[T](t: => T)(implicit evidence: ( T ) => Result) = {
+      val jetty = new EmbeddedJetty("spring/src/test/webapp")
       try {
-        startJetty()
+        jetty.start()
         t
-      } finally stopJetty()
+      } finally jetty.stop()
     }
   }
 }
