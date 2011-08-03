@@ -1,8 +1,7 @@
 package templemore.liftjson.provider.spring
 
 import org.specs2.Specification
-import templemore.liftjson.provider.ProviderConfig
-
+import templemore.liftjson.provider.{JsonASTTransformer, TransformerFactory, ProviderConfig}
 
 class ProviderConfigFactorySpec extends Specification { def is =
 
@@ -12,6 +11,7 @@ class ProviderConfigFactorySpec extends Specification { def is =
     "produce instances of a ProviderConfig"                          ! providerConfigType^
     "produce singleton instances"                                    ! singleton^
     "produce a default ProviderConfig instance"                      ! defaultInstance^
+    "allow a custom transformer factory to be applied"               ! customTransformerFactory^
                                                                      end
 
   def providerConfigType = {
@@ -29,4 +29,13 @@ class ProviderConfigFactorySpec extends Specification { def is =
     factory.getObject must_== ProviderConfig()
   }
 
+  def customTransformerFactory = {
+    val factory = new ProviderConfigFactory()
+    factory.setTransformerFactory(TestTransformerFactory)
+    factory.getObject.transformerFactory must_==  TestTransformerFactory
+  }
+
+  object TestTransformerFactory extends TransformerFactory {
+    def transformer[T <: JsonASTTransformer](transformerClass: Class[T]) = transformerClass.newInstance()
+  }
 }
