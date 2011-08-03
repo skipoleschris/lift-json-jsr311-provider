@@ -13,7 +13,7 @@ class NewInstanceTransformerFactorySpec extends Specification { def is =
                                                                      end
 
   def createTransformer = {
-    val factory = new NewInstanceTransformerFactory()
+    val factory = NewInstanceTransformerFactory
     factory.transformer(classOf[AddressInputTransformer]) must_!= null
   }
 }

@@ -76,10 +76,10 @@ class ProviderAcceptanceTest extends Specification
     factory.invoked must_==  true
   }
 
-  class TestTransformerFactory(var invoked: Boolean = false) extends NewInstanceTransformerFactory {
+  class TestTransformerFactory(var invoked: Boolean = false) extends TransformerFactory {
     override def transformer[T <: JsonASTTransformer](transformerClass: Class[T]) = {
       invoked = true
-      super.transformer(transformerClass)
+      NewInstanceTransformerFactory.transformer(transformerClass)
     }
   }
 

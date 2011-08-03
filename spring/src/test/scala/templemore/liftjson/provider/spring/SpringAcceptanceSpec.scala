@@ -16,7 +16,7 @@ class SpringAcceptanceSpec extends Specification
                                                                      endp^
   "The spring support module should"                                 ^
     "allow the provider to be used in a spring application"          ! JettyServer(springSupport)^
-    "support injection of a transformer for input json"              ! JettyServer(transformIn)^
+    "support injection of a transformer from spring"                 ! JettyServer(injectedTransformer)^
                                                                      end
 
   def springSupport = {
@@ -28,7 +28,7 @@ class SpringAcceptanceSpec extends Specification
     json must_== compact(usersJsonDocument)
   }
 
-  def transformIn = {
+  def injectedTransformer = {
     invokeService[String]("/user", 204) { res =>
       res.header("Content-Type", "application/json").put(classOf[ClientResponse], UserJsonDocument)
     } must_==  None
