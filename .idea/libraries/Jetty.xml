@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="Jetty">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-http/jars/jetty-http-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-io/jars/jetty-io-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-continuation/jars/jetty-continuation-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-server/jars/jetty-server-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-util/jars/jetty-util-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-xml/jars/jetty-xml-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-security/jars/jetty-security-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-servlet/jars/jetty-servlet-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-webapp/jars/jetty-webapp-7.4.5.v20110725.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/javax.servlet/servlet-api/jars/servlet-api-2.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
