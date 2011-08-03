@@ -11,9 +11,9 @@ The project is available from the Templemore maven repository at http://templemo
 In maven:
 
     <dependency>
-        <groupId>templemore</groupId>
+        <groupId>templemore.json</groupId>
         <artifactId>lift-json-jsr311-provider_2.9.0-1</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </dependency>
 
     <repository>
@@ -31,7 +31,7 @@ In SBT:
 
     resolvers += "Templemore Repository" at "http://templemore.co.uk/repo"
 
-    libraryDependencies += "templemore" %% "lift-json-jsr311-provider" % "0.2"
+    libraryDependencies += "templemore.json" %% "lift-json-jsr311-provider" % "0.3"
 
 ## Configuration ##
 
@@ -117,14 +117,14 @@ So, you're using Spring Framework? Really? Oh, well, if you must! There is an op
 In maven:
 
     <dependency>
-        <groupId>templemore</groupId>
+        <groupId>templemore.json</groupId>
         <artifactId>lift-json-jsr311-spring_2.9.0-1</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </dependency>
 
 In SBT:
 
-    libraryDependencies += "templemore" %% "lift-json-jsr311-spring" % "0.2"
+    libraryDependencies += "templemore.json" %% "lift-json-jsr311-spring" % "0.3"
 
 ### Basic Configuration ###
 
@@ -167,7 +167,7 @@ Please see the git issues list for details of all planed features for this libra
 
 ## Release History ##
 
-### Release 0.2 ###
+### Release 0.3 ###
 
 * Implementation of custom transformers for incoming and outgoing Json
 * Implementation of configuration with pluggable transformer factory
