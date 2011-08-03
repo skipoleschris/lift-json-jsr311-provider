@@ -57,7 +57,7 @@ If you want finer grained control you can create a custom ProviderConfig instanc
 
 In some cases it might be required that the JSON representation of a domain object is slightly different from the case class representation used in the domain model.
 
-For example, consider a User object. In the incoming JSON we might allow a "password" field that contains the unhashed password value to be set. In our domain model this is represented as pair of fields: salt and passwordHash. Additionally, when the user is returned as JSON we don't wish to include these salt and passwordHash fields in the JSON response.
+For example, consider a User object. In the incoming JSON we might allow a "password" field that contains the un-hashed password value to be set. In our domain model this is represented as pair of fields: salt and passwordHash. Additionally, when the user is returned as JSON we don't wish to include these salt and passwordHash fields in the JSON response.
 
 Fortunately the lift-json framework has the ability to support these use cases. When transforming between JSON and case classes, the lift-json framework uses an intermediate Abstract Syntax Tree (AST) representation. We can intercept at this point and make changes to the AST prior to completing the generation of the JSON or case class instance.
 
@@ -108,3 +108,71 @@ By default, instances of transformers are created from the class each time they 
     val config = ProviderConfig(transformerFactory = new MyCustomTransformerFactory())
     // Create the provider with the custom config
 
+## Spring Integration ##
+
+So, you're using Spring Framework? Really? Oh, well, if you must! There is an optional library that provides some pretty decent integration with the Spring Framework. It allows you to register the provider using spring and to configure the provider and transformers via injected dependencies.
+
+### Additional dependency ###
+
+In maven:
+
+    <dependency>
+        <groupId>templemore</groupId>
+        <artifactId>lift-json-jsr311-spring_2.9.0-1</artifactId>
+        <version>0.2</version>
+    </dependency>
+
+In SBT:
+
+    libraryDependencies += "templemore" %% "lift-json-jsr311-spring" % "0.2"
+
+### Basic Configuration ###
+
+The most simple way to integrate the provider with Spring is to just declare the provider as a singleton bean in the spring application context:
+
+    <bean class="templemore.liftjson.provider.LiftJsonProvider" scope="singleton"/>
+
+In this model the provider will be created using the default configuration and will utilise its own internal factories.
+
+### Extended Configuration ###
+
+The configuration can be extended to allow Spring to provide the provider config, which allows for custom factories to be used that use the Spring Bean Factory as the source for things such as transformers.
+
+An example of this extended configuration is:
+
+    <bean class="templemore.liftjson.provider.LiftJsonProvider" scope="singleton">
+        <constructor-arg ref="providerConfig"/>
+    </bean>
+
+    <bean id="providerConfig" class="templemore.liftjson.provider.spring.ProviderConfigFactory">
+        <property name="transformerFactory" ref="transformerFactory"/>
+    </bean>
+
+    <bean id="transformerFactory" class="templemore.liftjson.provider.spring.SpringAwareTransformerFactory"/>
+
+    <!-- Resources -->
+    <bean id="userRestService" class="templemore.liftjson.provider.spring.fixture.UserRestService"/>
+
+    <bean id="userInputTransformer" class="templemore.liftjson.provider.spring.fixture.UserInputTransformer"/>
+
+In the above configuration, the provider is created with a custom provider config factory. This factory utilises a special Spring aware transformer factory that obtains transformers from the Spring Bean Factory rather than creating them directly.
+
+## Using Outside JSR-311 ##
+
+This library is primarily about integrating Lift-Json with JSR-311 compatible servers. However, all of the power of the framework is contained in Scala code that has no direct dependencies on JSR-311 APIs. It is therefore fully possible to utilise all of the library features by making your application component(s) extends the LiftJsonIntegration trait.
+
+## Roadmap ##
+
+Please see the git issues list for details of all planed features for this library. The issues list can be found at: http://github.com/skipoleschris/lift-json-jsr311-provider/issues
+
+## Release History ##
+
+### Release 0.2 ###
+
+* Implementation of custom transformers for incoming and outgoing Json
+* Implementation of configuration with pluggable transformer factory
+* Spring integration support
+
+### Release 0.1 ###
+
+* Initial release providing the implementation of the core provider support.

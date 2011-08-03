@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Provider configuration -->
+    <bean class="templemore.liftjson.provider.LiftJsonProvider" scope="singleton">
+        <constructor-arg ref="providerConfig"/>
+    </bean>
+
+    <bean id="providerConfig" class="templemore.liftjson.provider.spring.ProviderConfigFactory">
+        <property name="transformerFactory" ref="transformerFactory"/>
+    </bean>
+
+    <bean id="transformerFactory" class="templemore.liftjson.provider.spring.SpringAwareTransformerFactory"/>
+
+    <!-- Resources -->
+    <bean id="userRestService" class="templemore.liftjson.provider.spring.fixture.UserRestService"/>
+
+    <bean id="userInputTransformer" class="templemore.liftjson.provider.spring.fixture.UserInputTransformer"/>
+
+</beans>
