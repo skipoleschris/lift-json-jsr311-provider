@@ -4,9 +4,10 @@ import java.lang.reflect.Type
 import java.lang.annotation.Annotation
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
 import java.io.{OutputStream, InputStream}
-import javax.ws.rs.{WebApplicationException, Consumes, Produces}
-import javax.ws.rs.core.{Response, MultivaluedMap, MediaType}
+import javax.ws.rs.core.{MultivaluedMap, MediaType}
 import javax.ws.rs.core.Response.Status
+import net.liftweb.json.MappingException
+import javax.ws.rs.{WebApplicationException, Consumes, Produces}
 
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
@@ -36,8 +37,14 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
               annotations: Array[Annotation],
               mediaType: MediaType,
               httpHeaders: MultivaluedMap[String, AnyRef],
-              entityStream: OutputStream): Unit =
-    convertToJson(value, entityStream, transformerClass(annotations))
+              entityStream: OutputStream): Unit = {
+    try {
+      convertToJson(value, entityStream, transformerClass(annotations))
+    }
+    catch {
+      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(Status.INTERNAL_SERVER_ERROR, e))
+    }
+  }
 
   def isReadable(classType: Class[_],
                  genericType: Type,
@@ -52,26 +59,16 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
                entityStream: InputStream) =  {
+    def handleMappingError(error: MappingError) =
+      throw new WebApplicationException(Jsr311JsonErrorResponse(error))
+
     try {
       convertFromJson(classType, entityStream, transformerClass(annotations))
+              .fold[AnyRef](handleMappingError, (obj => obj))
     }
     catch {
-      case e => {
-        throw new WebApplicationException(new Response {
-          def getMetadata = Jsr311MultiValuedMap()
-          def getStatus = Status.INTERNAL_SERVER_ERROR.getStatusCode
-          def getEntity = """{
-            "applicationCode" : "0",
-            "httpStatusCode" : "%d",
-            "httpReasonPhrase" : "%s",
-            "cause" : "%s",
-            "message" : "%s"
-            }""".format(Status.INTERNAL_SERVER_ERROR.getStatusCode,
-                        Status.INTERNAL_SERVER_ERROR.getReasonPhrase,
-                        e.getClass.getName,
-                        e.getMessage)
-        })
-      }
+      case wae: WebApplicationException => throw wae
+      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(Status.INTERNAL_SERVER_ERROR, e))
     }
   }
 

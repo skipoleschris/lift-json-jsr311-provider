@@ -32,6 +32,8 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     "Recognise a transformer annotation"                             ! utiliseReadTransformer^
                                                                      end
 
+  //TODO: Deal with right/left return
+
   def canWriteJsonCaseClass = {
     val provider = new TestableLiftJsonProvider()
     provider.isWriteable(classOf[Person],
@@ -206,7 +208,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
 
     override protected def convertFromJson(classType: Class[AnyRef],
                                            entityStream: InputStream,
-                                           transformerClass: Option[Class[_ <: JsonASTTransformer]]): AnyRef = {
+                                           transformerClass: Option[Class[_ <: JsonASTTransformer]]): Either[MappingError, AnyRef] = {
       capturedClassType = classType
       capturedTransformerClass = transformerClass
 
@@ -214,7 +216,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
       Source.fromInputStream(entityStream).getLines().foreach { l => buf.append(l); buf.append('\n') }
       capturedJson = buf.toString()
 
-      outputObject
+      Right(outputObject)
     }
   }
 }

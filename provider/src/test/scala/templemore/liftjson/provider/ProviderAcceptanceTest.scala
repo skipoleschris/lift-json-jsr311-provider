@@ -149,7 +149,8 @@ class ProviderAcceptanceTest extends Specification
         "applicationCode" : "1",
         "httpStatusCode" : "%d",
         "httpReasonPhrase" : "%s",
-        "message" : "Unable to process supplied Json body"
+        "cause" : "MappingError",
+        "message" : "Unable to process supplied Json body. No usable value for firstName. Did not find value which can be converted into java.lang.String"
       }""".format(Status.BAD_REQUEST.getStatusCode,
                   Status.BAD_REQUEST.getReasonPhrase)
 

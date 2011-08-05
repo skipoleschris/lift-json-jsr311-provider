@@ -33,7 +33,7 @@ class LiftJsonIntegrationSpec extends Specification
     val entityStream = new ByteArrayInputStream(json.getBytes)
     convertFromJson(classOf[Address].asInstanceOf[Class[AnyRef]],
                     entityStream,
-                    None) must_== Address(List("Line 1"), "Town", "POSTCODE", "UK")
+                    None) must_== Right(Address(List("Line 1"), "Town", "POSTCODE", "UK"))
   }
 
   def writeJsonFromCaseClass = {
@@ -60,7 +60,7 @@ class LiftJsonIntegrationSpec extends Specification
     val entityStream = new ByteArrayInputStream(json.getBytes)
     convertFromJson(classOf[Address].asInstanceOf[Class[AnyRef]],
                     entityStream,
-                    Some(classOf[AddressInputTransformer])) must_== Address(List("Line 1", "Line 2"), "Town", "POSTCODE", "UK")
+                    Some(classOf[AddressInputTransformer])) must_== Right(Address(List("Line 1", "Line 2"), "Town", "POSTCODE", "UK"))
   }
 
   def writeTransformedJsonFromCaseClass = {
@@ -84,7 +84,7 @@ class LiftJsonIntegrationSpec extends Specification
     val entityStream = new ByteArrayInputStream(json.getBytes)
     convertFromJson(classOf[FooBar].asInstanceOf[Class[AnyRef]],
                     entityStream,
-                    None) must_== FooBar(Some("Line 1"), None)
+                    None) must_== Right(FooBar(Some("Line 1"), None))
   }
 
   def writeJsonFromCaseClassWithOptionals = {
