@@ -12,12 +12,13 @@ class LiftJsonIntegrationSpec extends Specification
   "Specification for the trait integrating lift json support"        ^
                                                                      endp^
   "The lift json integration should"                                 ^
-    "Convert json into a case class instance"                        ! readCaseClassFromJson^
-    "Convert a case class instance into json"                        ! writeJsonFromCaseClass^
-    "Convert transformed json into a case class"                     ! readCaseClassFromTransformedJson^
-    "Convert a case class instance into transformed json"            ! writeTransformedJsonFromCaseClass^
-    "Convert json into optional case class fields"                   ! readCaseClassWithOptionalsFromJson^
-    "Convert a optional case class fields into json"                 ! writeJsonFromCaseClassWithOptionals^
+    "convert json into a case class instance"                        ! readCaseClassFromJson^
+    "convert a case class instance into json"                        ! writeJsonFromCaseClass^
+    "convert transformed json into a case class"                     ! readCaseClassFromTransformedJson^
+    "convert a case class instance into transformed json"            ! writeTransformedJsonFromCaseClass^
+    "convert json into optional case class fields"                   ! readCaseClassWithOptionalsFromJson^
+    "convert a optional case class fields into json"                 ! writeJsonFromCaseClassWithOptionals^
+    "deal with not being able to map json to a case class"           ! failureToMapJson^
                                                                      end
 
   protected def config = ProviderConfig()
@@ -33,7 +34,7 @@ class LiftJsonIntegrationSpec extends Specification
     val entityStream = new ByteArrayInputStream(json.getBytes)
     convertFromJson(classOf[Address].asInstanceOf[Class[AnyRef]],
                     entityStream,
-                    None) must_== Address(List("Line 1"), "Town", "POSTCODE", "UK")
+                    None) must_== Right(Address(List("Line 1"), "Town", "POSTCODE", "UK"))
   }
 
   def writeJsonFromCaseClass = {
@@ -60,7 +61,7 @@ class LiftJsonIntegrationSpec extends Specification
     val entityStream = new ByteArrayInputStream(json.getBytes)
     convertFromJson(classOf[Address].asInstanceOf[Class[AnyRef]],
                     entityStream,
-                    Some(classOf[AddressInputTransformer])) must_== Address(List("Line 1", "Line 2"), "Town", "POSTCODE", "UK")
+                    Some(classOf[AddressInputTransformer])) must_== Right(Address(List("Line 1", "Line 2"), "Town", "POSTCODE", "UK"))
   }
 
   def writeTransformedJsonFromCaseClass = {
@@ -84,7 +85,7 @@ class LiftJsonIntegrationSpec extends Specification
     val entityStream = new ByteArrayInputStream(json.getBytes)
     convertFromJson(classOf[FooBar].asInstanceOf[Class[AnyRef]],
                     entityStream,
-                    None) must_== FooBar(Some("Line 1"), None)
+                    None) must_== Right(FooBar(Some("Line 1"), None))
   }
 
   def writeJsonFromCaseClassWithOptionals = {
@@ -95,6 +96,19 @@ class LiftJsonIntegrationSpec extends Specification
           "foo" : "Line 1"
         }""")
   }
+
+  def failureToMapJson = {
+    val json = """{
+          "invalid" : "Line 1"
+        }"""
+
+    val entityStream = new ByteArrayInputStream(json.getBytes)
+    convertFromJson(classOf[BarFoo].asInstanceOf[Class[AnyRef]],
+                    entityStream,
+                    None) must_== Left(new MappingError("No usable value for foo. Did not find value which can be converted into java.lang.String"))
+  }
 }
 
+
 case class FooBar(foo: Option[String], bar: Option[String])
+case class BarFoo(foo: String)

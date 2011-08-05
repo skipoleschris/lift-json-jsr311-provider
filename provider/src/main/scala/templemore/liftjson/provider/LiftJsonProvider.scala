@@ -1,11 +1,13 @@
 package templemore.liftjson.provider
 
-import javax.ws.rs.{Consumes, Produces}
 import java.lang.reflect.Type
 import java.lang.annotation.Annotation
-import javax.ws.rs.core.{MultivaluedMap, MediaType}
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
 import java.io.{OutputStream, InputStream}
+import javax.ws.rs.core.{MultivaluedMap, MediaType}
+import javax.ws.rs.core.Response.Status
+import net.liftweb.json.MappingException
+import javax.ws.rs.{WebApplicationException, Consumes, Produces}
 
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
@@ -35,8 +37,14 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
               annotations: Array[Annotation],
               mediaType: MediaType,
               httpHeaders: MultivaluedMap[String, AnyRef],
-              entityStream: OutputStream): Unit =
-    convertToJson(value, entityStream, transformerClass(annotations))
+              entityStream: OutputStream): Unit = {
+    try {
+      convertToJson(value, entityStream, transformerClass(annotations))
+    }
+    catch {
+      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(e))
+    }
+  }
 
   def isReadable(classType: Class[_],
                  genericType: Type,
@@ -51,7 +59,17 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
                entityStream: InputStream) =  {
-    convertFromJson(classType, entityStream, transformerClass(annotations))
+    def handleMappingError(error: MappingError) =
+      throw new WebApplicationException(Jsr311JsonErrorResponse(error))
+
+    try {
+      convertFromJson(classType, entityStream, transformerClass(annotations))
+              .fold[AnyRef](handleMappingError, (obj => obj))
+    }
+    catch {
+      case wae: WebApplicationException => throw wae
+      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(e))
+    }
   }
 
   // Yuk, converting between Java and Scala can sometimes be messy!

@@ -4,8 +4,9 @@ import fixture.{Person, Address, TestRestService}
 import org.specs2.Specification
 import com.sun.jersey.api.client.ClientResponse
 import java.util.TimeZone
-import java.lang.IllegalStateException
 import util.{JsonUtilities, DateUtilities, RestServiceFixture}
+import java.lang.IllegalStateException
+import javax.ws.rs.core.Response.Status
 
 class ProviderAcceptanceTest extends Specification
                              with RestServiceFixture
@@ -21,6 +22,9 @@ class ProviderAcceptanceTest extends Specification
     "support transformation of incoming JSON"                        ! transformingInRestCall^
     "support transformation of outgoing JSON"                        ! transformingOutRestCall^
     "allow use of an alternative transformer factory"                ! alternativeTransformerFactory^
+    "cleanly handle json that cannot be converted to a case class"   ! unconvertableInput^
+    "return 500 code error message on any unhandled exception in"    ! unhandledExceptionIn^
+    "return 500 code error message on any unhandled exception out"   ! unhandledExceptionOut^
                                                                      end
 
   def simpleInRestCall = {
@@ -83,6 +87,36 @@ class ProviderAcceptanceTest extends Specification
     }
   }
 
+  def unconvertableInput = {
+    val resource = new TestRestService()
+    val response = invokeService[String](resource, "/ws/simple", 400) { res =>
+      res.header("Content-Type", "application/json").put(classOf[ClientResponse], invalidJsonDocument)
+    }
+
+    val error = response.getOrElse(throw new IllegalStateException())
+    compact(error) must_== compact(unconvertableInputJson)
+  }
+
+  def unhandledExceptionIn = {
+    val resource = new TestRestService()
+    val response = invokeService[String](resource, "/ws/exception", 500) { res =>
+      res.header("Content-Type", "application/json").put(classOf[ClientResponse], simpleJsonDocument)
+    }
+
+    val error = response.getOrElse(throw new IllegalStateException())
+    compact(error) must_== compact(error500Json)
+  }
+
+  def unhandledExceptionOut = {
+    val resource = new TestRestService()
+    val response = invokeService[String](resource, "/ws/exception", 500) { res =>
+      res.get(classOf[ClientResponse])
+    }
+
+    val error = response.getOrElse(throw new IllegalStateException())
+    compact(error) must_== compact(error500Json)
+  }
+
   protected lazy val simpleJsonDocument = """{
         "firstName" : "Chris",
         "surname" : "Turner",
@@ -105,4 +139,27 @@ class ProviderAcceptanceTest extends Specification
           "country" : "UK"
         }
       }""".format(asIsoString(makeDate(2, 7, 1973)))
+
+  protected lazy val invalidJsonDocument = """{
+        "fullName" : "Chris Turner",
+        "age" : "38",
+      }""".format(asIsoString(makeDate(2, 7, 1973)))
+
+  protected lazy val unconvertableInputJson = """{
+        "applicationCode" : "1",
+        "httpStatusCode" : "%d",
+        "httpReasonPhrase" : "%s",
+        "cause" : "MappingError",
+        "message" : "Unable to process supplied Json body. No usable value for firstName. Did not find value which can be converted into java.lang.String"
+      }""".format(Status.BAD_REQUEST.getStatusCode,
+                  Status.BAD_REQUEST.getReasonPhrase)
+
+  protected lazy val error500Json = """{
+        "applicationCode" : "0",
+        "httpStatusCode" : "%d",
+        "httpReasonPhrase" : "%s",
+        "cause" : "java.lang.IllegalStateException",
+        "message" : "Expected error message"
+      }""".format(Status.INTERNAL_SERVER_ERROR.getStatusCode,
+                  Status.INTERNAL_SERVER_ERROR.getReasonPhrase)
 }
