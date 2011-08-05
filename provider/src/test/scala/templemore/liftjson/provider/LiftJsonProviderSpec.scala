@@ -7,6 +7,7 @@ import util.{DateUtilities, JsonUtilities}
 import java.io.{InputStream, OutputStream, ByteArrayInputStream, ByteArrayOutputStream}
 import io.Source
 import collection.mutable.StringBuilder
+import javax.ws.rs.WebApplicationException
 
 class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUtilities { def is =
 
@@ -30,9 +31,8 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     "convert into the expected case class"                           ! convertToCaseClass^
     "not utilise any transformer when no annotation"                 ! notUtiliseReadTransformer^
     "recognise a transformer annotation"                             ! utiliseReadTransformer^
+    "generate a 400 exception for invalid json"                      ! exceptionForInvalidJson^
                                                                      end
-
-  //TODO: Deal with right/left return
 
   def canWriteJsonCaseClass = {
     val provider = new TestableLiftJsonProvider()
@@ -169,8 +169,21 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     transformer.capturedTransformerClass must_== Some(classOf[PersonInputTransformer])
   }
 
-  private def readFrom(entityStream: InputStream, annotation: Option[java.lang.annotation.Annotation] = None) = {
-    val provider = new TestableLiftJsonProvider()
+  def exceptionForInvalidJson = {
+    val entityStream = new ByteArrayInputStream("".getBytes)
+    readFrom(entityStream,
+             Some(transformerAnnotation),
+             None,
+             Some(new MappingError("The message"))) must throwA[WebApplicationException].like {
+      case e: WebApplicationException => e.getResponse.getStatus must_== 400
+    }
+  }
+
+  private def readFrom(entityStream: InputStream,
+                       annotation: Option[java.lang.annotation.Annotation] = None,
+                       outputObject: Option[Address] = Some(Address(Seq("Line 1"), "Town", "Postcode", "Country")),
+                       mappingError: Option[MappingError] = None) = {
+    val provider = new TestableLiftJsonProvider(outputObject = outputObject, mappingError = mappingError)
     val annotations = annotation.map(Array(_)).getOrElse(Array[java.lang.annotation.Annotation]())
     provider.readFrom(classOf[Address].asInstanceOf[Class[AnyRef]],
                       classOf[Address].getGenericSuperclass,
@@ -191,7 +204,8 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
   // Testable version of the provider that overrides the conversion methods to capture
   // the parameter values rather than doing the actual conversions
   class TestableLiftJsonProvider(outputJson: String = "",
-                                 outputObject: AnyRef = null) extends LiftJsonProvider {
+                                 outputObject: Option[AnyRef] = None,
+                                 mappingError: Option[MappingError] = None) extends LiftJsonProvider {
 
     var capturedValue: AnyRef = _
     var capturedClassType: Class[AnyRef] = _
@@ -216,7 +230,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
       Source.fromInputStream(entityStream).getLines().foreach { l => buf.append(l); buf.append('\n') }
       capturedJson = buf.toString()
 
-      Right(outputObject)
+      outputObject.map(Right(_)).getOrElse(Left(mappingError.get))
     }
   }
 }
