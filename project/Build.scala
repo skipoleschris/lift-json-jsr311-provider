@@ -4,7 +4,7 @@ import Keys._
 
 object BuildSettings {
   val buildOrganization = "templemore.json"
-  val buildScalaVersion = "2.9.0-1"
+  val buildScalaVersion = "2.9.1.RC1"
   val buildVersion      = "0.3"
 
   val buildSettings = Defaults.defaultSettings ++
@@ -17,7 +17,8 @@ object Dependencies {
 
   val extraResolvers = Seq("Java.net Repository" at "http://download.java.net/maven/2")
 
-  val liftJson = "net.liftweb" %% "lift-json" % "2.4-M3" % "compile"
+  //val liftJson = "net.liftweb" %% "lift-json" % "2.4-M3" % "compile"
+  val liftJson = "net.liftweb" % "lift-json_2.9.0-1" % "2.4-M3" % "compile"
   val jsr311Api = "javax.ws.rs"  % "jsr311-api" % "1.1.1" % "compile"
 
   val jerseyCore = "com.sun.jersey" % "jersey-core" % "1.6" % "provided"
@@ -33,7 +34,8 @@ object Dependencies {
   val jettyServer = "org.eclipse.jetty" % "jetty-server" % "7.4.5.v20110725" % "test"
   val jettyWebapp = "org.eclipse.jetty" % "jetty-webapp" % "7.4.5.v20110725" % "test"
 
-  val specs2 = "org.specs2" %% "specs2" % "1.5" % "test"
+//  val specs2 = "org.specs2" %% "specs2" % "1.5" % "test"
+  val specs2 = "org.specs2" % "specs2_2.9.0-1" % "1.5" % "test"
 
   val coreDeps = Seq(liftJson, jsr311Api, jerseyCore, jerseyServer, jerseyClient, jerseySimpleServer, specs2)
   val springDeps = Seq(springBeans, springContext, springWeb, springJersey, jettyServer, jettyWebapp)

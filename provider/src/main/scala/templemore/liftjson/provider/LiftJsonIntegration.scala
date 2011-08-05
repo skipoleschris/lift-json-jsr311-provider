@@ -4,7 +4,7 @@ import net.liftweb.json._
 import io.Source
 import java.io.{InputStream, OutputStream, OutputStreamWriter}
 
-private[provider] trait LiftJsonIntegration {
+trait LiftJsonIntegration {
 
   protected def config: ProviderConfig
 

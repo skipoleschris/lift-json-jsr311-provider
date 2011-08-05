@@ -1,11 +1,12 @@
 package templemore.liftjson.provider
 
-import javax.ws.rs.{Consumes, Produces}
 import java.lang.reflect.Type
 import java.lang.annotation.Annotation
-import javax.ws.rs.core.{MultivaluedMap, MediaType}
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
 import java.io.{OutputStream, InputStream}
+import javax.ws.rs.{WebApplicationException, Consumes, Produces}
+import javax.ws.rs.core.{Response, MultivaluedMap, MediaType}
+import javax.ws.rs.core.Response.Status
 
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
@@ -51,7 +52,27 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
                entityStream: InputStream) =  {
-    convertFromJson(classType, entityStream, transformerClass(annotations))
+    try {
+      convertFromJson(classType, entityStream, transformerClass(annotations))
+    }
+    catch {
+      case e => {
+        throw new WebApplicationException(new Response {
+          def getMetadata = Jsr311MultiValuedMap()
+          def getStatus = Status.INTERNAL_SERVER_ERROR.getStatusCode
+          def getEntity = """{
+            "applicationCode" : "0",
+            "httpStatusCode" : "%d",
+            "httpReasonPhrase" : "%s",
+            "cause" : "%s",
+            "message" : "%s"
+            }""".format(Status.INTERNAL_SERVER_ERROR.getStatusCode,
+                        Status.INTERNAL_SERVER_ERROR.getReasonPhrase,
+                        e.getClass.getName,
+                        e.getMessage)
+        })
+      }
+    }
   }
 
   // Yuk, converting between Java and Scala can sometimes be messy!
