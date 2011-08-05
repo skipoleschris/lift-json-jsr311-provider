@@ -13,23 +13,23 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
   "Specification for the lift-json provider class"                   ^
                                                                      endp^
   "A writer lift-json provider should"                               ^
-    "Indicate it can write for json into a case class"               ! canWriteJsonCaseClass^
-    "Indicate it CAN NOT write for text into a case class"           ! canNotWriteTextCaseClass^
-    "Indicate it CAN NOT write for json into a non-case class"       ! canNotWriteJsonNormalClass^
-    "Fail to provide a size"                                         ! noSizeProvided^
-    "Convert the expected case class instance"                       ! convertFromCaseClass^
-    "Write json to the supplied entity stream"                       ! writeToEntityStream^
-    "Not utilise and transformer when no annotation"                 ! notUtiliseWriteTransformer^
-    "Recognise a transformer annotation"                             ! utiliseWriteTransformer^
+    "indicate it can write for json into a case class"               ! canWriteJsonCaseClass^
+    "indicate it CAN NOT write for text into a case class"           ! canNotWriteTextCaseClass^
+    "indicate it CAN NOT write for json into a non-case class"       ! canNotWriteJsonNormalClass^
+    "fail to provide a size"                                         ! noSizeProvided^
+    "convert the expected case class instance"                       ! convertFromCaseClass^
+    "write json to the supplied entity stream"                       ! writeToEntityStream^
+    "not utilise and transformer when no annotation"                 ! notUtiliseWriteTransformer^
+    "recognise a transformer annotation"                             ! utiliseWriteTransformer^
                                                                      endp^
   "A reader lift-json provider should"                               ^
-    "Indicate it can read for json into a case class"                ! canReadJsonCaseClass^
-    "Indicate it CAN NOT read for text into a case class"            ! canNotReadTextCaseClass^
-    "Indicate it CAN NOT read for json into a non-case class"        ! canNotReadJsonNormalClass^
-    "Convert json from the supplied entity stream"                   ! readFromEntityStream^
-    "Convert into the expected case class"                           ! convertToCaseClass^
-    "Not utilise any transformer when no annotation"                 ! notUtiliseReadTransformer^
-    "Recognise a transformer annotation"                             ! utiliseReadTransformer^
+    "indicate it can read for json into a case class"                ! canReadJsonCaseClass^
+    "indicate it CAN NOT read for text into a case class"            ! canNotReadTextCaseClass^
+    "indicate it CAN NOT read for json into a non-case class"        ! canNotReadJsonNormalClass^
+    "convert json from the supplied entity stream"                   ! readFromEntityStream^
+    "convert into the expected case class"                           ! convertToCaseClass^
+    "not utilise any transformer when no annotation"                 ! notUtiliseReadTransformer^
+    "recognise a transformer annotation"                             ! utiliseReadTransformer^
                                                                      end
 
   //TODO: Deal with right/left return

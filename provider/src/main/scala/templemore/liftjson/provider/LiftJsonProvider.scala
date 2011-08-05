@@ -42,7 +42,7 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
       convertToJson(value, entityStream, transformerClass(annotations))
     }
     catch {
-      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(Status.INTERNAL_SERVER_ERROR, e))
+      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(e))
     }
   }
 
@@ -68,7 +68,7 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
     }
     catch {
       case wae: WebApplicationException => throw wae
-      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(Status.INTERNAL_SERVER_ERROR, e))
+      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(e))
     }
   }
 

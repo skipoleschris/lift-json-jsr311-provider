@@ -26,8 +26,8 @@ object Jsr311JsonErrorResponse {
   private val INTERNAL_ERROR = 0
   private val MAPPING_ERROR = 1
 
-  def apply(status: Status, cause: Throwable) =
-    new Jsr311JsonErrorResponse(INTERNAL_ERROR, status, cause.getClass.getName, cause.getMessage)
+  def apply(cause: Throwable) =
+    new Jsr311JsonErrorResponse(INTERNAL_ERROR, Status.INTERNAL_SERVER_ERROR, cause.getClass.getName, cause.getMessage)
 
   def apply(error: MappingError) =
     new Jsr311JsonErrorResponse(MAPPING_ERROR, Status.BAD_REQUEST, error.cause, error.message)
