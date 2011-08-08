@@ -108,6 +108,10 @@ By default, instances of transformers are created from the class each time they 
     val config = ProviderConfig(transformerFactory = new MyCustomTransformerFactory())
     // Create the provider with the custom config
 
+## Error Responses ##
+
+TODO: Write the documentation for this!
+
 ## Spring Integration ##
 
 So, you're using Spring Framework? Really? Oh, well, if you must! There is an optional library that provides some pretty decent integration with the Spring Framework. It allows you to register the provider using spring and to configure the provider and transformers via injected dependencies.
