@@ -1,9 +1,9 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.jsr311
 
 import org.specs2.Specification
-import util.JsonUtilities
 import net.liftweb.json.MappingException
-
+import templemore.liftjson.provider.util.JsonUtilities
+import templemore.liftjson.provider.MappingError
 
 class Jsr311JsonErrorResponseSpec extends Specification with JsonUtilities { def is =
 

@@ -1,7 +1,8 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.jsr311
 
 import javax.ws.rs.core.Response
 import javax.ws.rs.core.Response.Status
+import templemore.liftjson.provider.MappingError
 
 class Jsr311JsonErrorResponse(applicationCode: Int, status: Status, cause: String, message: String) extends Response {
 

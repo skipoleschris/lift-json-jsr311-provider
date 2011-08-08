@@ -1,4 +1,4 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.jsr311
 
 import javax.ws.rs.core.MultivaluedMap
 

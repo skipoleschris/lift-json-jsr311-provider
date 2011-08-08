@@ -5,8 +5,8 @@ import java.lang.annotation.Annotation
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
 import java.io.{OutputStream, InputStream}
 import javax.ws.rs.core.{MultivaluedMap, MediaType}
-import javax.ws.rs.core.Response.Status
-import net.liftweb.json.MappingException
+import jsr311.Jsr311JsonErrorResponse
+
 import javax.ws.rs.{WebApplicationException, Consumes, Produces}
 
 @Provider
