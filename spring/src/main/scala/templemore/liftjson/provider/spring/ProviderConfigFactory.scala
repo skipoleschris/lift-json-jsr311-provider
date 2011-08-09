@@ -2,15 +2,14 @@ package templemore.liftjson.provider.spring
 
 import org.springframework.beans.factory.FactoryBean
 import reflect.BeanProperty
-import templemore.liftjson.provider.{TransformerFactory, NewInstanceTransformerFactory, ProviderConfig}
+import templemore.liftjson.provider._
 
 class ProviderConfigFactory extends FactoryBean[ProviderConfig] {
 
   @BeanProperty var transformerFactory: TransformerFactory = NewInstanceTransformerFactory
+  @BeanProperty var errorResponseGenerator: ErrorResponseGenerator = JsonDocumentErrorResponseGenerator
 
-  //TODO: di support for the error response generator
-
-  def getObject = ProviderConfig(transformerFactory)
+  def getObject = ProviderConfig(transformerFactory, errorResponseGenerator)
 
   def getObjectType = classOf[ProviderConfig]
 
