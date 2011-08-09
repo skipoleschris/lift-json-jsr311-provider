@@ -5,9 +5,8 @@ import java.lang.annotation.Annotation
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
 import java.io.{OutputStream, InputStream}
 import javax.ws.rs.core.{MultivaluedMap, MediaType}
-import jsr311.Jsr311JsonErrorResponse
-
 import javax.ws.rs.{WebApplicationException, Consumes, Produces}
+import jsr311.Jsr311ResponseAdapter
 
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
@@ -42,7 +41,10 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
       convertToJson(value, entityStream, transformerClass(annotations))
     }
     catch {
-      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(e))
+      case e => {
+        val error = config.errorResponseGenerator.generate(e)
+        throw new WebApplicationException(Jsr311ResponseAdapter(error))
+      }
     }
   }
 
@@ -59,8 +61,10 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
                entityStream: InputStream) =  {
-    def handleMappingError(error: MappingError) =
-      throw new WebApplicationException(Jsr311JsonErrorResponse(error))
+    def handleMappingError(mappingError: MappingError) = {
+      val error = config.errorResponseGenerator.generate(mappingError)
+      throw new WebApplicationException(Jsr311ResponseAdapter(error))
+    }
 
     try {
       convertFromJson(classType, entityStream, transformerClass(annotations))
@@ -68,7 +72,10 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
     }
     catch {
       case wae: WebApplicationException => throw wae
-      case e => throw new WebApplicationException(Jsr311JsonErrorResponse(e))
+      case e => {
+        val error = config.errorResponseGenerator.generate(e)
+        throw new WebApplicationException(Jsr311ResponseAdapter(error))
+      }
     }
   }
 

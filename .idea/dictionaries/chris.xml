@@ -4,6 +4,8 @@
       <w>deps</w>
       <w>endp</w>
       <w>github</w>
+      <w>licensable</w>
+      <w>licensor</w>
       <w>liftjson</w>
       <w>liftweb</w>
       <w>pluggable</w>
