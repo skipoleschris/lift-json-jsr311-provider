@@ -1,25 +1,25 @@
 package templemore.liftjson.provider
 
-import javax.ws.rs.core.Response.Status
-
+import jsr311.HttpStatus
+import jsr311.Jsr311StatusAdapter._
 
 private[provider] object JsonDocumentErrorResponseGenerator extends ErrorResponseGenerator {
 
   def generate(cause: Throwable) =
-    ErrorResponse(Status.INTERNAL_SERVER_ERROR.getStatusCode,
-                  makeJson(Status.INTERNAL_SERVER_ERROR, cause.getClass.getName, cause.getMessage))
+    ErrorResponse(internalServerError.statusCode,
+                  makeJson(internalServerError, cause.getClass.getName, cause.getMessage))
 
   def generate(error: MappingError) =
-    ErrorResponse(Status.BAD_REQUEST.getStatusCode,
-                  makeJson(Status.BAD_REQUEST, error.cause, error.message))
+    ErrorResponse(badRequest.statusCode,
+                  makeJson(badRequest, error.cause, error.message))
 
-  private def makeJson(status: Status, cause: String, message: String) = """{
+  private def makeJson(status: HttpStatus, cause: String, message: String) = """{
     "httpStatusCode" : "%d",
     "httpReasonPhrase" : "%s",
     "cause" : "%s",
     "message" : "%s"
-  }""".format(status.getStatusCode,
-              status.getReasonPhrase,
+  }""".format(status.statusCode,
+              status.reasonPhrase,
               cause,
               message)
 }

@@ -22,7 +22,7 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                   genericType: Type,
                   annotations: Array[Annotation],
                   mediaType: MediaType) =
-    isSupportedFor(mediaType, classType)
+    isSupportedFor(mediaType.toString, classType)
 
   def getSize(value: AnyRef,
               classType: Class[_],
@@ -52,7 +52,7 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                  genericType: Type,
                  annotations: Array[Annotation],
                  mediaType: MediaType) = {
-    isSupportedFor(mediaType, classType)
+    isSupportedFor(mediaType.toString, classType)
   }
 
   def readFrom(classType: Class[AnyRef],
