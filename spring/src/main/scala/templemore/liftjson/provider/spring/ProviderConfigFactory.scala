@@ -8,6 +8,8 @@ class ProviderConfigFactory extends FactoryBean[ProviderConfig] {
 
   @BeanProperty var transformerFactory: TransformerFactory = NewInstanceTransformerFactory
 
+  //TODO: di support for the error response generator
+
   def getObject = ProviderConfig(transformerFactory)
 
   def getObjectType = classOf[ProviderConfig]
