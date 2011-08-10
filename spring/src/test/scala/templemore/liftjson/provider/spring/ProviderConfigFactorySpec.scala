@@ -47,8 +47,10 @@ class ProviderConfigFactorySpec extends Specification { def is =
   }
 
   object TestErrorResponseGenerator extends ErrorResponseGenerator {
-    def generate(cause: Throwable) = ErrorResponse(500, cause.getMessage)
+    private val JsonContentType = "application/json"
 
-    def generate(error: MappingError) = ErrorResponse(400, error.message)
+    def generate(cause: Throwable) = ErrorResponse(500, JsonContentType, cause.getMessage)
+
+    def generate(error: MappingError) = ErrorResponse(400, JsonContentType, error.message)
   }
 }
