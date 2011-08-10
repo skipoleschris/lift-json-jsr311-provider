@@ -4,7 +4,7 @@ import Keys._
 
 object BuildSettings {
   val buildOrganization = "templemore.json"
-  val buildScalaVersion = "2.9.1.RC1"
+  val buildScalaVersion = "2.9.1.RC2"
   val buildVersion      = "0.3"
 
   val buildSettings = Defaults.defaultSettings ++

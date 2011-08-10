@@ -146,7 +146,6 @@ class ProviderAcceptanceTest extends Specification
       }""".format(asIsoString(makeDate(2, 7, 1973)))
 
   protected lazy val unconvertableInputJson = """{
-        "applicationCode" : "1",
         "httpStatusCode" : "%d",
         "httpReasonPhrase" : "%s",
         "cause" : "MappingError",
@@ -155,7 +154,6 @@ class ProviderAcceptanceTest extends Specification
                   Status.BAD_REQUEST.getReasonPhrase)
 
   protected lazy val error500Json = """{
-        "applicationCode" : "0",
         "httpStatusCode" : "%d",
         "httpReasonPhrase" : "%s",
         "cause" : "java.lang.IllegalStateException",

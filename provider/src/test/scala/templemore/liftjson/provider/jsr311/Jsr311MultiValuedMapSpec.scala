@@ -1,4 +1,4 @@
-package templemore.liftjson.provider
+package templemore.liftjson.provider.jsr311
 
 import org.specs2.Specification
 

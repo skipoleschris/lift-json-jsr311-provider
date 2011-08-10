@@ -16,7 +16,8 @@ class SpringAcceptanceSpec extends Specification
                                                                      endp^
   "The spring support module should"                                 ^
     "allow the provider to be used in a spring application"          ! JettyServer(springSupport)^
-    "support injection of a transformer from spring"                 ! JettyServer(injectedTransformer)^
+    "support spring injection of a transformer"                      ! JettyServer(injectedTransformer)^
+    "support spring injection of custom error response generator"    ! JettyServer(injectedErrorResponseGenerator)^
                                                                      end
 
   def springSupport = {
@@ -34,6 +35,15 @@ class SpringAcceptanceSpec extends Specification
     } must_==  None
   }
 
+  def injectedErrorResponseGenerator = {
+    val response = invokeService[String]("/user", 400) { res =>
+      res.header("Content-Type", "application/json").put(classOf[ClientResponse], InvalidUserJsonDocument)
+    }
+
+    val message = response.getOrElse(throw new IllegalStateException())
+    message must_== "Unable to process supplied Json body. Unable to find user field in json document."
+  }
+
   private val usersJsonDocument = """[
       { "username" : "root", "fullName" : "Administrator" },
       { "username" : "chris", "fullName" : "Chris Turner" },
@@ -44,6 +54,9 @@ class SpringAcceptanceSpec extends Specification
     "user" : "Fred Bloggs <fred>"
   }"""
 
+  private val InvalidUserJsonDocument = """{
+    "invalid" : "I'm not valid"
+  }"""
 
   def before = throw new IllegalStateException()
 
