@@ -1,3 +1,3 @@
 package templemore.liftjson.provider
 
-case class ErrorResponse(httpStatusCode: Int, responseBody: String)
+case class ErrorResponse(httpStatusCode: Int, contentType: String, responseBody: String)

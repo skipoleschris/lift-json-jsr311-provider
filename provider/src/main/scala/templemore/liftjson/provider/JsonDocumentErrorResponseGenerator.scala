@@ -5,12 +5,18 @@ import jsr311.Jsr311StatusAdapter._
 
 private[provider] object JsonDocumentErrorResponseGenerator extends ErrorResponseGenerator {
 
+  private val JsonContentType = "application/json"
+
   def generate(cause: Throwable) =
-    ErrorResponse(internalServerError.statusCode,
-                  makeJson(internalServerError, cause.getClass.getName, cause.getMessage))
+    {
+      ErrorResponse(internalServerError.statusCode,
+                    JsonContentType,
+                    makeJson(internalServerError, cause.getClass.getName, cause.getMessage))
+    }
 
   def generate(error: MappingError) =
     ErrorResponse(badRequest.statusCode,
+                  JsonContentType,
                   makeJson(badRequest, error.cause, error.message))
 
   private def makeJson(status: HttpStatus, cause: String, message: String) = """{
