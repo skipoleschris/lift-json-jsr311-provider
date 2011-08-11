@@ -1,7 +1,7 @@
 package templemore.liftjson.provider.spring
 
 import org.specs2.Specification
-import templemore.liftjson.provider.{JsonASTTransformer, TransformerFactory, ProviderConfig}
+import templemore.liftjson.provider._
 
 class ProviderConfigFactorySpec extends Specification { def is =
 
@@ -12,6 +12,7 @@ class ProviderConfigFactorySpec extends Specification { def is =
     "produce singleton instances"                                    ! singleton^
     "produce a default ProviderConfig instance"                      ! defaultInstance^
     "allow a custom transformer factory to be applied"               ! customTransformerFactory^
+    "allow a custom error response generator to be applied"          ! customErrorResponseGenerator^
                                                                      end
 
   def providerConfigType = {
@@ -35,7 +36,21 @@ class ProviderConfigFactorySpec extends Specification { def is =
     factory.getObject.transformerFactory must_==  TestTransformerFactory
   }
 
+  def customErrorResponseGenerator = {
+    val factory = new ProviderConfigFactory()
+    factory.setErrorResponseGenerator(TestErrorResponseGenerator)
+    factory.getObject.errorResponseGenerator must_==  TestErrorResponseGenerator
+  }
+
   object TestTransformerFactory extends TransformerFactory {
     def transformer[T <: JsonASTTransformer](transformerClass: Class[T]) = transformerClass.newInstance()
+  }
+
+  object TestErrorResponseGenerator extends ErrorResponseGenerator {
+    private val JsonContentType = "application/json"
+
+    def generate(cause: Throwable) = ErrorResponse(500, JsonContentType, cause.getMessage)
+
+    def generate(error: MappingError) = ErrorResponse(400, JsonContentType, error.message)
   }
 }

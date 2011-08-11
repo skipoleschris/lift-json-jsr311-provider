@@ -7,29 +7,31 @@ import util.{DateUtilities, JsonUtilities}
 import java.io.{InputStream, OutputStream, ByteArrayInputStream, ByteArrayOutputStream}
 import io.Source
 import collection.mutable.StringBuilder
+import javax.ws.rs.WebApplicationException
 
 class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUtilities { def is =
 
   "Specification for the lift-json provider class"                   ^
                                                                      endp^
   "A writer lift-json provider should"                               ^
-    "Indicate it can write for json into a case class"               ! canWriteJsonCaseClass^
-    "Indicate it CAN NOT write for text into a case class"           ! canNotWriteTextCaseClass^
-    "Indicate it CAN NOT write for json into a non-case class"       ! canNotWriteJsonNormalClass^
-    "Fail to provide a size"                                         ! noSizeProvided^
-    "Convert the expected case class instance"                       ! convertFromCaseClass^
-    "Write json to the supplied entity stream"                       ! writeToEntityStream^
-    "Not utilise and transformer when no annotation"                 ! notUtiliseWriteTransformer^
-    "Recognise a transformer annotation"                             ! utiliseWriteTransformer^
+    "indicate it can write for json into a case class"               ! canWriteJsonCaseClass^
+    "indicate it CAN NOT write for text into a case class"           ! canNotWriteTextCaseClass^
+    "indicate it CAN NOT write for json into a non-case class"       ! canNotWriteJsonNormalClass^
+    "fail to provide a size"                                         ! noSizeProvided^
+    "convert the expected case class instance"                       ! convertFromCaseClass^
+    "write json to the supplied entity stream"                       ! writeToEntityStream^
+    "not utilise and transformer when no annotation"                 ! notUtiliseWriteTransformer^
+    "recognise a transformer annotation"                             ! utiliseWriteTransformer^
                                                                      endp^
   "A reader lift-json provider should"                               ^
-    "Indicate it can read for json into a case class"                ! canReadJsonCaseClass^
-    "Indicate it CAN NOT read for text into a case class"            ! canNotReadTextCaseClass^
-    "Indicate it CAN NOT read for json into a non-case class"        ! canNotReadJsonNormalClass^
-    "Convert json from the supplied entity stream"                   ! readFromEntityStream^
-    "Convert into the expected case class"                           ! convertToCaseClass^
-    "Not utilise any transformer when no annotation"                 ! notUtiliseReadTransformer^
-    "Recognise a transformer annotation"                             ! utiliseReadTransformer^
+    "indicate it can read for json into a case class"                ! canReadJsonCaseClass^
+    "indicate it CAN NOT read for text into a case class"            ! canNotReadTextCaseClass^
+    "indicate it CAN NOT read for json into a non-case class"        ! canNotReadJsonNormalClass^
+    "convert json from the supplied entity stream"                   ! readFromEntityStream^
+    "convert into the expected case class"                           ! convertToCaseClass^
+    "not utilise any transformer when no annotation"                 ! notUtiliseReadTransformer^
+    "recognise a transformer annotation"                             ! utiliseReadTransformer^
+    "generate a 400 exception for invalid json"                      ! exceptionForInvalidJson^
                                                                      end
 
   def canWriteJsonCaseClass = {
@@ -167,8 +169,21 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
     transformer.capturedTransformerClass must_== Some(classOf[PersonInputTransformer])
   }
 
-  private def readFrom(entityStream: InputStream, annotation: Option[java.lang.annotation.Annotation] = None) = {
-    val provider = new TestableLiftJsonProvider()
+  def exceptionForInvalidJson = {
+    val entityStream = new ByteArrayInputStream("".getBytes)
+    readFrom(entityStream,
+             Some(transformerAnnotation),
+             None,
+             Some(new MappingError("The message"))) must throwA[WebApplicationException].like {
+      case e: WebApplicationException => e.getResponse.getStatus must_== 400
+    }
+  }
+
+  private def readFrom(entityStream: InputStream,
+                       annotation: Option[java.lang.annotation.Annotation] = None,
+                       outputObject: Option[Address] = Some(Address(Seq("Line 1"), "Town", "Postcode", "Country")),
+                       mappingError: Option[MappingError] = None) = {
+    val provider = new TestableLiftJsonProvider(outputObject = outputObject, mappingError = mappingError)
     val annotations = annotation.map(Array(_)).getOrElse(Array[java.lang.annotation.Annotation]())
     provider.readFrom(classOf[Address].asInstanceOf[Class[AnyRef]],
                       classOf[Address].getGenericSuperclass,
@@ -189,7 +204,8 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
   // Testable version of the provider that overrides the conversion methods to capture
   // the parameter values rather than doing the actual conversions
   class TestableLiftJsonProvider(outputJson: String = "",
-                                 outputObject: AnyRef = null) extends LiftJsonProvider {
+                                 outputObject: Option[AnyRef] = None,
+                                 mappingError: Option[MappingError] = None) extends LiftJsonProvider {
 
     var capturedValue: AnyRef = _
     var capturedClassType: Class[AnyRef] = _
@@ -206,7 +222,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
 
     override protected def convertFromJson(classType: Class[AnyRef],
                                            entityStream: InputStream,
-                                           transformerClass: Option[Class[_ <: JsonASTTransformer]]): AnyRef = {
+                                           transformerClass: Option[Class[_ <: JsonASTTransformer]]): Either[MappingError, AnyRef] = {
       capturedClassType = classType
       capturedTransformerClass = transformerClass
 
@@ -214,7 +230,7 @@ class LiftJsonProviderSpec extends Specification with JsonUtilities with DateUti
       Source.fromInputStream(entityStream).getLines().foreach { l => buf.append(l); buf.append('\n') }
       capturedJson = buf.toString()
 
-      outputObject
+      outputObject.map(Right(_)).getOrElse(Left(mappingError.get))
     }
   }
 }

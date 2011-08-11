@@ -11,9 +11,9 @@ The project is available from the Templemore maven repository at http://templemo
 In maven:
 
     <dependency>
-        <groupId>templemore</groupId>
+        <groupId>templemore.json</groupId>
         <artifactId>lift-json-jsr311-provider_2.9.0-1</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </dependency>
 
     <repository>
@@ -31,7 +31,7 @@ In SBT:
 
     resolvers += "Templemore Repository" at "http://templemore.co.uk/repo"
 
-    libraryDependencies += "templemore" %% "lift-json-jsr311-provider" % "0.2"
+    libraryDependencies += "templemore.json" %% "lift-json-jsr311-provider" % "0.3"
 
 ## Configuration ##
 
@@ -108,6 +108,56 @@ By default, instances of transformers are created from the class each time they 
     val config = ProviderConfig(transformerFactory = new MyCustomTransformerFactory())
     // Create the provider with the custom config
 
+## Error Responses ##
+
+When an error occurs during the incoming or outgoing transformation, between Json and case classes, then an error is generated. This error is returned as an HTTP status code and a document body defining the error.
+
+To facilitate a fully Json based approach to application APIs, the default error generator returns a Json representation of the error. This follows the format shown below:
+
+    {
+        "httpStatusCode" : "400",
+        "httpReasonPhrase" : "Bad Request",
+        "cause" : "MappingError",
+        "message" : "Unable to process supplied Json body. No usable value for firstName. Did not find value which can be converted into java.lang.String"
+    }
+
+The Json error document contains the following fields:
+
+* httpStatusCode - HTTP status code (which is also sent as the HTTP response code)
+* httpReasonPhrase - HTTP reason phrase
+* cause - Cause string, which will either be "MappingError" or the name of an exception class
+* message - The associated exception message or details of the failed mapping
+
+Currently the provider will generate 'Bad Request' (status 400) responses if it cannot map incoming Json content to case classes. Failure to map returned case classes back to Json is seen as an application error and an 'Internal Application Error' (status 500) response will be sent. Any other exceptions trapped during the marshaling or unmarshaling will result in an 'Internal Application Error' (status 500) response containing details of the exception that was raised.
+
+
+### Customised Error Response Generator ###
+
+There may be cases where the above Json error responses are not suitable for your application. In these cases you can create an alternative error response generator and use it to replace the build in version.
+
+First you need to code a class (or object) that extends the templemore.liftjson.provider.ErrorResponseGenerator interface:
+
+    import templemore.liftjson.provider.ErrorResponse
+    import templemore.liftjson.provider.ErrorResponseGenerator
+
+    class MyErrorResponseGenerator extends ErrorResponseGenerator {
+      def generate(cause: Throwable): ErrorResponse = ...
+      def generate(error: MappingError): ErrorResponse = ...
+    }
+
+The two generate methods each take information about what caused the error and must return an instance of the ErrorResponse class. The error response contains three fields:
+
+* The HTTP status code to return
+* The content type of the associated entity
+* The entity body that describes the error
+
+(Note that the default Json error response generator utilises the templemore.liftjson.provider.jsr311.Jsr311StatusAdapter object to simplify access to HTTP status codes and reason phrases. This object can be utilised by other error generator implementations if required.)
+
+Finally, the provider needs to be configured to use the alternative error response generator:
+
+    val config = ProviderConfig(errorResponseGenerator = new MyErrorResponseGenerator())
+    // Create the provider with the custom config
+
 ## Spring Integration ##
 
 So, you're using Spring Framework? Really? Oh, well, if you must! There is an optional library that provides some pretty decent integration with the Spring Framework. It allows you to register the provider using spring and to configure the provider and transformers via injected dependencies.
@@ -117,14 +167,14 @@ So, you're using Spring Framework? Really? Oh, well, if you must! There is an op
 In maven:
 
     <dependency>
-        <groupId>templemore</groupId>
+        <groupId>templemore.json</groupId>
         <artifactId>lift-json-jsr311-spring_2.9.0-1</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </dependency>
 
 In SBT:
 
-    libraryDependencies += "templemore" %% "lift-json-jsr311-spring" % "0.2"
+    libraryDependencies += "templemore.json" %% "lift-json-jsr311-spring" % "0.3"
 
 ### Basic Configuration ###
 
@@ -146,6 +196,7 @@ An example of this extended configuration is:
 
     <bean id="providerConfig" class="templemore.liftjson.provider.spring.ProviderConfigFactory">
         <property name="transformerFactory" ref="transformerFactory"/>
+        <property name="errorResponseGenerator" ref="errorResponseGenerator"/>
     </bean>
 
     <bean id="transformerFactory" class="templemore.liftjson.provider.spring.SpringAwareTransformerFactory"/>
@@ -155,17 +206,30 @@ An example of this extended configuration is:
 
     <bean id="userInputTransformer" class="templemore.liftjson.provider.spring.fixture.UserInputTransformer"/>
 
+    <bean id="errorResponseGenerator" class="templemore.liftjson.provider.spring.fixture.PlainTextErrorResponseGenerator"/>
+
 In the above configuration, the provider is created with a custom provider config factory. This factory utilises a special Spring aware transformer factory that obtains transformers from the Spring Bean Factory rather than creating them directly.
+
+Additionally, it defines a custom implementation of the error response generator that is created and configured via spring.
 
 ## Using Outside JSR-311 ##
 
 This library is primarily about integrating Lift-Json with JSR-311 compatible servers. However, all of the power of the framework is contained in Scala code that has no direct dependencies on JSR-311 APIs. It is therefore fully possible to utilise all of the library features by making your application component(s) extends the LiftJsonIntegration trait.
+
+Additionally it is possible to utilise the ErrorResponseGenerator and Jsr311ResponseAdapter classes within other parts of your Jsr-311 compatible application. More work will be done in this area on a future release.
 
 ## Roadmap ##
 
 Please see the git issues list for details of all planed features for this library. The issues list can be found at: http://github.com/skipoleschris/lift-json-jsr311-provider/issues
 
 ## Release History ##
+
+### Release 0.3 ###
+
+* Implementation of error handling and responses for mapping errors and any exceptions thrown within the provider
+* Implementation of pluggable error response generator
+* General library and version upgrades
+* Cleaner separation of generic code from code that depends on the Jsr-311 api
 
 ### Release 0.2 ###
 

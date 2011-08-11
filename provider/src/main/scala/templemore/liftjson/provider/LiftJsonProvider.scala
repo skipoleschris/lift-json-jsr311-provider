@@ -1,11 +1,12 @@
 package templemore.liftjson.provider
 
-import javax.ws.rs.{Consumes, Produces}
 import java.lang.reflect.Type
 import java.lang.annotation.Annotation
-import javax.ws.rs.core.{MultivaluedMap, MediaType}
 import javax.ws.rs.ext.{Provider, MessageBodyReader, MessageBodyWriter}
 import java.io.{OutputStream, InputStream}
+import javax.ws.rs.core.{MultivaluedMap, MediaType}
+import javax.ws.rs.{WebApplicationException, Consumes, Produces}
+import jsr311.Jsr311ResponseAdapter
 
 @Provider
 @Consumes(Array(MediaType.APPLICATION_JSON, "text/json"))
@@ -21,7 +22,7 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                   genericType: Type,
                   annotations: Array[Annotation],
                   mediaType: MediaType) =
-    isSupportedFor(mediaType, classType)
+    isSupportedFor(mediaType.toString, classType)
 
   def getSize(value: AnyRef,
               classType: Class[_],
@@ -35,14 +36,23 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
               annotations: Array[Annotation],
               mediaType: MediaType,
               httpHeaders: MultivaluedMap[String, AnyRef],
-              entityStream: OutputStream): Unit =
-    convertToJson(value, entityStream, transformerClass(annotations))
+              entityStream: OutputStream): Unit = {
+    try {
+      convertToJson(value, entityStream, transformerClass(annotations))
+    }
+    catch {
+      case e => {
+        val error = config.errorResponseGenerator.generate(e)
+        throw new WebApplicationException(Jsr311ResponseAdapter(error))
+      }
+    }
+  }
 
   def isReadable(classType: Class[_],
                  genericType: Type,
                  annotations: Array[Annotation],
                  mediaType: MediaType) = {
-    isSupportedFor(mediaType, classType)
+    isSupportedFor(mediaType.toString, classType)
   }
 
   def readFrom(classType: Class[AnyRef],
@@ -51,7 +61,22 @@ class LiftJsonProvider(val config: ProviderConfig) extends MessageBodyReader[Any
                mediaType: MediaType,
                httpHeaders: MultivaluedMap[String, String],
                entityStream: InputStream) =  {
-    convertFromJson(classType, entityStream, transformerClass(annotations))
+    def handleMappingError(mappingError: MappingError) = {
+      val error = config.errorResponseGenerator.generate(mappingError)
+      throw new WebApplicationException(Jsr311ResponseAdapter(error))
+    }
+
+    try {
+      convertFromJson(classType, entityStream, transformerClass(annotations))
+              .fold[AnyRef](handleMappingError, (obj => obj))
+    }
+    catch {
+      case wae: WebApplicationException => throw wae
+      case e => {
+        val error = config.errorResponseGenerator.generate(e)
+        throw new WebApplicationException(Jsr311ResponseAdapter(error))
+      }
+    }
   }
 
   // Yuk, converting between Java and Scala can sometimes be messy!

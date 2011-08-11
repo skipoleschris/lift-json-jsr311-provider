@@ -41,6 +41,21 @@ class TestRestService extends DateUtilities {
     val address = Address(Seq("4 Some Building", "Some Road"), "Some Town", "ST1 1ST", "UK")
     Person("Chris", "Turner", makeDate(2, 7, 1973, TimeZone.getTimeZone("UTC")), address)
   }
+
+  @PUT
+  @Path("exception")
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def exceptionPut(@Transformer(classOf[ExceptionThrowingTransformer]) person: Person): Unit = {
+  }
+
+  @GET
+  @Path("exception")
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  @Transformer(classOf[ExceptionThrowingTransformer])
+  def exceptionGet: Person = {
+    val address = Address(Seq("4 Some Building", "Some Road"), "Some Town", "ST1 1ST", "UK")
+    Person("Chris", "Turner", makeDate(2, 7, 1973, TimeZone.getTimeZone("UTC")), address)
+  }
 }
 
 case class Person(firstName: String, surname: String, dob: Date, address: Address)

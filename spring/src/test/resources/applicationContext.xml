@@ -10,9 +10,12 @@
 
     <bean id="providerConfig" class="templemore.liftjson.provider.spring.ProviderConfigFactory">
         <property name="transformerFactory" ref="transformerFactory"/>
+        <property name="errorResponseGenerator" ref="errorResponseGenerator"/>
     </bean>
 
     <bean id="transformerFactory" class="templemore.liftjson.provider.spring.SpringAwareTransformerFactory"/>
+
+    <bean id="errorResponseGenerator" class="templemore.liftjson.provider.spring.fixture.PlainTextErrorResponseGenerator"/>
 
     <!-- Resources -->
     <bean id="userRestService" class="templemore.liftjson.provider.spring.fixture.UserRestService"/>

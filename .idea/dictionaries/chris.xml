@@ -4,7 +4,10 @@
       <w>deps</w>
       <w>endp</w>
       <w>github</w>
+      <w>licensable</w>
+      <w>licensor</w>
       <w>liftjson</w>
+      <w>liftweb</w>
       <w>pluggable</w>
       <w>repo</w>
       <w>roadmap</w>
@@ -12,6 +15,7 @@
       <w>skipoleschris</w>
       <w>springframework</w>
       <w>templemore</w>
+      <w>unmarshaling</w>
       <w>webapp</w>
       <w>writeable</w>
     </words>
